@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --bg-primary: #0A0C10;
+            --bg-secondary: #101419;
+            --text-primary: #F0F0F0;
+            --text-secondary: #a0a0a0;
+            --accent: #00BFFF;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            margin-bottom: 2rem;
+            font-weight: 300;
+            text-align: center;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 4px;
+            color: var(--bg-primary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .login-button:hover { opacity: 0.8; }
+
+        .error { color: #ff4444; text-align: center; margin-top: 1rem; }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 { font-weight: 300; }
+
+        .logout-btn {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab.active {
+            color: var(--accent);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-weight: 300;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        #map {
+            height: 400px;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .count-badge {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .export-btn {
+            background: var(--accent);
+            border: none;
+            color: var(--bg-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .export-btn:hover { opacity: 0.8; }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .filter-input {
+            padding: 0.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <h1>Monitoring Dashboard</h1>
+            <input type="password" class="login-input" id="passwordInput" placeholder="Enter password">
+            <button class="login-button" onclick="login()">Login</button>
+            <div class="error" id="loginError"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="header">
+            <h1>Analytics Dashboard</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="container">
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label class="filter-label">Source</label>
+                    <select class="filter-input" id="sourceFilter">
+                        <option value="">All Sources</option>
+                        <option value="reisig.org">reisig.org</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Date From</label>
+                    <input type="date" class="filter-input" id="dateFrom">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Date To</label>
+                    <input type="date" class="filter-input" id="dateTo">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">&nbsp;</label>
+                    <button class="export-btn" onclick="applyFilters()">Apply Filters</button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('visits')">Visits</button>
+                <button class="tab" onclick="switchTab('queries')">Queries</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uniqueVisitors">0</div>
+                    <div class="stat-label">Unique Visitors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalQueries">0</div>
+                    <div class="stat-label">Total Queries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="countries">0</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="chart-container">
+                <h3 class="chart-title">Activity Over Time</h3>
+                <canvas id="activityChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Visitor Locations</h3>
+                <div id="map"></div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Top Countries</h3>
+                <canvas id="countriesChart"></canvas>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <h3 class="chart-title">Recent Activity</h3>
+                <table>
+                    <thead>
+                        <tr id="tableHeaders"></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Export -->
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportData('visits')">Export Visits</button>
+                <button class="export-btn" onclick="exportData('queries')">Export Queries</button>
+                <button class="export-btn" onclick="exportData('ip_cache')">Export IP Cache</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'https://api.reisig.org';
+        let authToken = null;
+        let currentTab = 'visits';
+        let currentData = [];
+        let charts = {};
+        let map = null;
+
+        // Authentication
+        document.getElementById('passwordInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') login();
+        });
+
+        async function login() {
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch(`${API_URL}/monitor/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    loadData();
+                } else {
+                    errorDiv.textContent = 'Invalid password';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error';
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            loadData();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            loadData();
+        }
+
+        // Load data
+        async function loadData() {
+            const source = document.getElementById('sourceFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            
+            const params = new URLSearchParams({
+                token: authToken,
+                type: currentTab,
+                ...(source && { source }),
+                ...(dateFrom && { start: dateFrom }),
+                ...(dateTo && { end: dateTo })
+            });
+
+            try {
+                const response = await fetch(`${API_URL}/monitor/data?${params}`);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                currentData = await response.json();
+                updateDashboard();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Update dashboard
+        function updateDashboard() {
+            // Calculate stats
+            const uniqueIPs = new Set();
+            const countriesSet = new Set();
+            const dailyActivity = new Map();
+            let totalQueries = 0;
+
+            currentData.forEach(entry => {
+                uniqueIPs.add(entry.ip);
+                if (entry.country && entry.country !== 'Unknown') {
+                    countriesSet.add(entry.country);
+                }
+                
+                const date = new Date(entry.timestamp).toLocaleDateString();
+                const currentCount = dailyActivity.get(date) || 0;
+                dailyActivity.set(date, currentCount + (entry.count || 1));
+                
+                if (currentTab === 'queries') totalQueries++;
+            });
+
+            // Update stats
+            document.getElementById('totalVisits').textContent = 
+                currentData.reduce((sum, entry) => sum + (entry.count || 1), 0);
+            document.getElementById('uniqueVisitors').textContent = uniqueIPs.size;
+            document.getElementById('totalQueries').textContent = 
+                currentTab === 'queries' ? currentData.length : totalQueries;
+            document.getElementById('countries').textContent = countriesSet.size;
+
+            // Update charts
+            updateActivityChart(dailyActivity);
+            updateCountriesChart();
+            updateMap();
+            updateTable();
+        }
+
+        // Activity chart
+        function updateActivityChart(dailyActivity) {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            if (charts.activity) charts.activity.destroy();
+            
+            const labels = Array.from(dailyActivity.keys()).slice(-30);
+            const data = labels.map(label => dailyActivity.get(label));
+
+            charts.activity = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Activity',
+                        data,
+                        borderColor: '#00BFFF',
+                        backgroundColor: 'rgba(0, 191, 255, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Countries chart
+        function updateCountriesChart() {
+            const ctx = document.getElementById('countriesChart').getContext('2d');
+            
+            if (charts.countries) charts.countries.destroy();
+            
+            const countries = {};
+            currentData.forEach(entry => {
+                if (entry.country && entry.country !== 'Unknown') {
+                    countries[entry.country] = (countries[entry.country] || 0) + (entry.count || 1);
+                }
+            });
+            
+            const sorted = Object.entries(countries)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            charts.countries = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(([country]) => country),
+                    datasets: [{
+                        label: 'Visitors',
+                        data: sorted.map(([, count]) => count),
+                        backgroundColor: '#00BFFF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Map
+        function updateMap() {
+            if (map) map.remove();
+            
+            map = L.map('map').setView([30, 0], 2);
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            currentData.forEach(entry => {
+                if (entry.latitude && entry.longitude) {
+                    const marker = L.circleMarker([entry.latitude, entry.longitude], {
+                        radius: Math.min(5 + (entry.count || 1), 15),
+                        fillColor: '#00BFFF',
+                        color: '#fff',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.6
+                    }).addTo(map);
+                    
+                    marker.bindPopup(`
+                        ${entry.city || 'Unknown'}, ${entry.country || 'Unknown'}<br>
+                        Visits: ${entry.count || 1}
+                    `);
+                }
+            });
+        }
+
+        // Table
+        function updateTable() {
+            const headers = document.getElementById('tableHeaders');
+            const body = document.getElementById('tableBody');
+            
+            // Set headers based on tab
+            if (currentTab === 'visits') {
+                headers.innerHTML = `
+                    <th>Time</th>
+                    <th>Count</th>
+                    <th>IP</th>
+                    <th>Country</th>
+                    <th>City</th>
+                    <th>Source</th>
+                `;
+            } else {
+                headers.innerHTML = `
+                    <th>Time</th>
+                    <th>IP</th>
+                    <th>Query</th>
+                    <th>Response</th>
+                `;
+            }
+            
+            // Populate table
+            body.innerHTML = '';
+            const recent = currentData.slice(-50).reverse();
+            
+            recent.forEach(entry => {
+                const row = body.insertRow();
+                
+                if (currentTab === 'visits') {
+                    row.innerHTML = `
+                        <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                        <td>${entry.count > 1 ? `<span class="count-badge">${entry.count}</span>` : '1'}</td>
+                        <td>${entry.ip}</td>
+                        <td>${entry.country || 'Unknown'}</td>
+                        <td>${entry.city || 'Unknown'}</td>
+                        <td>${entry.source}</td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                        <td>${entry.ip}</td>
+                        <td>${entry.query?.substring(0, 50)}...</td>
+                        <td>${entry.response?.substring(0, 50)}...</td>
+                    `;
+                }
+            });
+        }
+
+        // Export data
+        async function exportData(type) {
+            const params = new URLSearchParams({ token: authToken });
+            window.location.href = `${API_URL}/monitor/export/${type}?${params}`;
+        }
+    </script>
+</body>
+</html>
