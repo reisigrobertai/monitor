@@ -17,11 +17,11 @@
             --text-secondary: #8892b0;
             --accent: #00d4ff;
             --accent-hover: #00a8cc;
+            --accent-gradient: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
             --border: rgba(255, 255, 255, 0.08);
             --danger: #ff5555;
             --success: #50fa7b;
             --warning: #ffb86c;
-            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         * { 
@@ -81,7 +81,7 @@
             margin-bottom: 2rem;
             font-weight: 600;
             text-align: center;
-            background: var(--gradient);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 2rem;
@@ -108,7 +108,7 @@
         .login-button {
             width: 100%;
             padding: 1rem;
-            background: var(--gradient);
+            background: var(--accent-gradient);
             border: none;
             border-radius: 10px;
             color: white;
@@ -120,7 +120,7 @@
 
         .login-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
         }
 
         .error {
@@ -150,7 +150,7 @@
         .header h1 {
             font-weight: 600;
             font-size: 1.5rem;
-            background: var(--gradient);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -200,11 +200,11 @@
         }
 
         .tab:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 212, 255, 0.1);
         }
 
         .tab.active {
-            background: var(--gradient);
+            background: var(--accent-gradient);
             color: white;
         }
 
@@ -232,7 +232,7 @@
         .stat-value {
             font-size: 2.5rem;
             font-weight: 700;
-            background: var(--gradient);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -259,7 +259,7 @@
         .badge-tor { background: var(--warning); color: black; }
         .badge-proxy { background: #8b5cf6; color: white; }
         .badge-crawler { background: #3b82f6; color: white; }
-        .badge-safe { background: var(--success); color: black; }
+        .badge-normal { background: var(--text-secondary); color: white; }
 
         /* Charts */
         .chart-container {
@@ -284,8 +284,9 @@
             margin-top: 1rem;
         }
 
-        /* Remove Leaflet attribution */
-        .leaflet-control-attribution {
+        /* Remove Leaflet controls */
+        .leaflet-control-attribution,
+        .leaflet-control-zoom {
             display: none !important;
         }
 
@@ -380,7 +381,7 @@
         }
 
         .page-btn:hover:not(:disabled) {
-            background: var(--gradient);
+            background: var(--accent-gradient);
             border-color: transparent;
             transform: translateY(-2px);
         }
@@ -446,15 +447,48 @@
         }
 
         .file-upload {
-            margin: 1rem 0;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            background: rgba(0, 212, 255, 0.05);
+            border-color: var(--accent-hover);
+        }
+
+        .file-upload-input {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: var(--accent-gradient);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .file-upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .file-upload-text {
+            margin-top: 1rem;
+            color: var(--text-secondary);
         }
 
         /* Buttons */
         .btn {
-            background: var(--gradient);
+            background: var(--accent-gradient);
             border: none;
             color: white;
             padding: 0.6rem 1.5rem;
@@ -466,7 +500,7 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
         }
 
         .btn-danger {
@@ -600,8 +634,10 @@
             <div class="file-manager" id="fileManager">
                 <h3 class="chart-title">Storage Files</h3>
                 <div class="file-upload">
-                    <input type="file" id="fileInput" class="filter-input">
-                    <button class="btn" onclick="uploadFile()">Upload File</button>
+                    <input type="file" id="fileInput" class="file-upload-input">
+                    <label for="fileInput" class="file-upload-label">Choose File</label>
+                    <div class="file-upload-text" id="fileUploadText">Or drag and drop a file here</div>
+                    <button class="btn" onclick="uploadFile()" style="margin-top: 1rem; display: none;" id="uploadBtn">Upload File</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -650,6 +686,15 @@
         let allData = [];
         let charts = {};
         let map = null;
+
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileUploadText').textContent = `Selected: ${file.name}`;
+                document.getElementById('uploadBtn').style.display = 'inline-block';
+            }
+        });
 
         // Authentication
         document.getElementById('passwordInput').addEventListener('keypress', e => {
@@ -796,7 +841,7 @@
 
             data.forEach(entry => {
                 uniqueIPs.add(entry.ip);
-                if (entry.country && entry.country !== 'Unknown') {
+                if (entry.country && entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
                     countriesSet.add(entry.country);
                 }
                 
@@ -898,8 +943,8 @@
                     datasets: [{
                         label: 'Entries',
                         data: sorted.map(([, count]) => count),
-                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(0, 212, 255, 0.8)',
+                        borderColor: 'rgba(0, 212, 255, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -928,12 +973,11 @@
             if (map) map.remove();
             
             map = L.map('map', {
-                attributionControl: false
+                attributionControl: false,
+                zoomControl: false
             }).setView([30, 0], 2);
             
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: ''
-            }).addTo(map);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
             // Group by location
             const locations = {};
@@ -1026,13 +1070,31 @@
             sortedData.forEach(entry => {
                 const row = body.insertRow();
                 
-                // Create security badges
+                // Create security badges - "NORMAL" means no security issues detected
                 let securityBadges = '';
-                if (entry.is_threat === 'true') securityBadges += '<span class="security-badge badge-threat">THREAT</span>';
-                if (entry.is_tor === 'true') securityBadges += '<span class="security-badge badge-tor">TOR</span>';
-                if (entry.is_proxy === 'true') securityBadges += '<span class="security-badge badge-proxy">PROXY</span>';
-                if (entry.is_crawler === 'true') securityBadges += '<span class="security-badge badge-crawler">CRAWLER</span>';
-                if (!securityBadges) securityBadges = '<span class="security-badge badge-safe">CLEAN</span>';
+                let hasSecurityIssue = false;
+                
+                if (entry.is_threat === 'true') {
+                    securityBadges += '<span class="security-badge badge-threat">THREAT</span>';
+                    hasSecurityIssue = true;
+                }
+                if (entry.is_tor === 'true') {
+                    securityBadges += '<span class="security-badge badge-tor">TOR</span>';
+                    hasSecurityIssue = true;
+                }
+                if (entry.is_proxy === 'true') {
+                    securityBadges += '<span class="security-badge badge-proxy">PROXY</span>';
+                    hasSecurityIssue = true;
+                }
+                if (entry.is_crawler === 'true') {
+                    securityBadges += '<span class="security-badge badge-crawler">CRAWLER</span>';
+                    hasSecurityIssue = true;
+                }
+                
+                // Show "NORMAL" only if no security issues
+                if (!hasSecurityIssue) {
+                    securityBadges = '<span class="security-badge badge-normal">NORMAL</span>';
+                }
                 
                 if (currentTab === 'visits') {
                     row.innerHTML = `
@@ -1091,16 +1153,13 @@
                     const sizeMB = (file.size / 1024 / 1024).toFixed(2);
                     const displaySize = file.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
                     
-                    const isEssential = ['visits.csv', 'queries-reisig.csv', 'ip-cache.csv'].includes(file.name);
-                    
                     row.innerHTML = `
                         <td>${file.name}</td>
                         <td>${displaySize}</td>
                         <td>${new Date(file.modified).toLocaleString()}</td>
                         <td>
                             <button class="btn btn-small" onclick="downloadFile('${file.name.replace('.csv', '')}')">Download</button>
-                            ${!isEssential ? 
-                              `<button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>` : ''}
+                            <button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>
                         </td>
                     `;
                 });
@@ -1131,13 +1190,19 @@
                         })
                     });
                     
+                    const result = await response.json();
                     if (response.ok) {
-                        alert('File uploaded successfully');
+                        if (result.overwritten) {
+                            alert(`File ${file.name} uploaded successfully (overwrote existing file)`);
+                        } else {
+                            alert('File uploaded successfully');
+                        }
                         loadFiles();
                         fileInput.value = '';
+                        document.getElementById('fileUploadText').textContent = 'Or drag and drop a file here';
+                        document.getElementById('uploadBtn').style.display = 'none';
                     } else {
-                        const error = await response.json();
-                        alert('Upload failed: ' + error.error);
+                        alert('Upload failed: ' + result.error);
                     }
                 } catch (error) {
                     alert('Upload error: ' + error.message);
@@ -1147,7 +1212,12 @@
         }
 
         async function deleteFile(filename) {
-            if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
+            const isEssential = ['visits.csv', 'queries-reisig.csv', 'ip-cache.csv'].includes(filename);
+            const message = isEssential 
+                ? `Delete ${filename}? This will clear all data and the file will be recreated empty.`
+                : `Delete ${filename}?`;
+                
+            if (!confirm(message)) return;
             
             try {
                 const response = await fetch(`${API_URL}/monitor/file/${filename}?token=${authToken}`, {
@@ -1167,12 +1237,7 @@
         }
 
         function downloadFile(filename) {
-            // Handle special case for ip-cache and queries-reisig
-            let downloadName = filename;
-            if (filename === 'ip-cache') downloadName = 'ip-cache';
-            if (filename === 'queries-reisig') downloadName = 'queries-reisig';
-            
-            window.open(`${API_URL}/monitor/download/${downloadName}?token=${authToken}`, '_blank');
+            window.open(`${API_URL}/monitor/download/${filename}?token=${authToken}`, '_blank');
         }
     </script>
 </body>
