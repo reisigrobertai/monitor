@@ -17,6 +17,7 @@
             --accent: #00BFFF;
             --border: rgba(255, 255, 255, 0.1);
             --danger: #ff4444;
+            --success: #44ff44;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,6 +29,7 @@
             min-height: 100vh;
         }
 
+        /* Login */
         .login-container {
             display: flex;
             align-items: center;
@@ -70,13 +72,11 @@
             color: var(--bg-primary);
             font-size: 1rem;
             cursor: pointer;
-            transition: opacity 0.3s;
         }
-
-        .login-button:hover { opacity: 0.8; }
 
         .error { color: var(--danger); text-align: center; margin-top: 1rem; }
 
+        /* Dashboard */
         .dashboard {
             display: none;
             min-height: 100vh;
@@ -91,12 +91,10 @@
             align-items: center;
         }
 
-        .header h1 { font-weight: 300; }
-
         .logout-btn {
-            background: rgba(255, 68, 68, 0.2);
-            border: 1px solid rgba(255, 68, 68, 0.3);
-            color: var(--text-primary);
+            background: var(--danger);
+            border: none;
+            color: white;
             padding: 0.5rem 1rem;
             border-radius: 4px;
             cursor: pointer;
@@ -104,10 +102,11 @@
 
         .container {
             padding: 2rem;
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }
 
+        /* Tabs */
         .tabs {
             display: flex;
             gap: 1rem;
@@ -123,7 +122,6 @@
             color: var(--text-secondary);
             cursor: pointer;
             position: relative;
-            transition: color 0.3s;
         }
 
         .tab.active {
@@ -140,6 +138,7 @@
             background: var(--accent);
         }
 
+        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -166,6 +165,7 @@
             margin-top: 0.5rem;
         }
 
+        /* Charts */
         .chart-container {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -186,70 +186,107 @@
             margin-top: 1rem;
         }
 
+        /* Table */
         .table-container {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 1.5rem;
-            overflow-x: auto;
             margin-bottom: 1.5rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 1rem;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 1200px;
         }
 
         th, td {
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         th {
             color: var(--accent);
             font-weight: 500;
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
         }
 
         tr:hover {
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .export-buttons {
+        /* Expandable cells */
+        .expandable {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .expandable:hover {
+            background: rgba(0, 191, 255, 0.1);
+        }
+
+        .expanded {
+            white-space: normal;
+            word-break: break-word;
+            max-width: none;
+        }
+
+        /* Pagination */
+        .pagination {
             display: flex;
+            justify-content: center;
+            align-items: center;
             gap: 1rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
+            margin: 2rem 0;
         }
 
-        .export-btn, .file-btn {
+        .page-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .page-btn:hover:not(:disabled) {
             background: var(--accent);
-            border: none;
             color: var(--bg-primary);
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: opacity 0.3s;
         }
 
-        .export-btn:hover, .file-btn:hover { opacity: 0.8; }
-
-        .delete-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 0.3rem 0.8rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
+        .page-info {
+            color: var(--text-secondary);
+        }
+
+        /* Filters */
         .filters {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
-            flex-wrap: wrap;
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
         .filter-group {
@@ -271,6 +308,7 @@
             color: var(--text-primary);
         }
 
+        /* File Manager */
         .file-manager {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -282,15 +320,57 @@
 
         .file-upload {
             margin: 1rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
         }
 
-        .file-input {
-            margin-bottom: 1rem;
+        /* Buttons */
+        .btn {
+            background: var(--accent);
+            border: none;
+            color: var(--bg-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: var(--bg-primary);
+            border: 1px solid var(--accent);
+            padding: 1rem;
+            border-radius: 4px;
+            z-index: 1000;
+            max-width: 500px;
+            word-wrap: break-word;
+            display: none;
         }
 
         @media (max-width: 768px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .filters { flex-direction: column; }
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -299,7 +379,7 @@
     <div class="login-container" id="loginContainer">
         <div class="login-box">
             <h1>Monitoring Dashboard</h1>
-            <input type="password" class="login-input" id="passwordInput" placeholder="Enter password">
+            <input type="password" class="login-input" id="passwordInput" placeholder="Enter password" autocomplete="off">
             <button class="login-button" onclick="login()">Login</button>
             <div class="error" id="loginError"></div>
         </div>
@@ -313,14 +393,29 @@
         </div>
 
         <div class="container">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('visits', 'All Websites')">All Websites</button>
+                <button class="tab" onclick="switchTab('queries', 'Homepage Queries')">Homepage Queries</button>
+                <button class="tab" onclick="switchTab('files', 'File Manager')">File Manager</button>
+            </div>
+
             <!-- Filters -->
-            <div class="filters">
+            <div class="filters" id="filtersSection">
                 <div class="filter-group">
                     <label class="filter-label">Source</label>
                     <select class="filter-input" id="sourceFilter">
                         <option value="">All Sources</option>
                         <option value="reisig.org">reisig.org</option>
                     </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">IP Address</label>
+                    <input type="text" class="filter-input" id="ipFilter" placeholder="Filter by IP">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Country</label>
+                    <input type="text" class="filter-input" id="countryFilter" placeholder="Filter by country">
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Date From</label>
@@ -332,15 +427,8 @@
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">&nbsp;</label>
-                    <button class="export-btn" onclick="applyFilters()">Apply Filters</button>
+                    <button class="btn" onclick="applyFilters()">Apply Filters</button>
                 </div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('visits', 'All Websites')">All Websites</button>
-                <button class="tab" onclick="switchTab('queries', 'Homepage Queries')">Homepage Queries</button>
-                <button class="tab" onclick="switchTab('files', 'File Manager')">File Manager</button>
             </div>
 
             <!-- Stats -->
@@ -350,7 +438,7 @@
                     <div class="stat-label">Total Entries</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="uniqueVisitors">0</div>
+                    <div class="stat-value" id="uniqueIPs">0</div>
                     <div class="stat-label">Unique IPs</div>
                 </div>
                 <div class="stat-card">
@@ -385,48 +473,64 @@
             <div class="file-manager" id="fileManager">
                 <h3 class="chart-title">Storage Files</h3>
                 <div class="file-upload">
-                    <input type="file" id="fileInput" class="file-input">
-                    <button class="file-btn" onclick="uploadFile()">Upload File</button>
+                    <input type="file" id="fileInput">
+                    <button class="btn" onclick="uploadFile()">Upload File</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Filename</th>
-                            <th>Size</th>
-                            <th>Modified</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="filesTableBody"></tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>Modified</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filesTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Data Table -->
             <div class="table-container" id="dataTableContainer">
-                <h3 class="chart-title">Recent Activity</h3>
-                <table>
-                    <thead>
-                        <tr id="tableHeaders"></tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+                <h3 class="chart-title">Data Table</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr id="tableHeaders"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">Previous</button>
+                    <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next</button>
+                </div>
             </div>
 
-            <!-- Export -->
-            <div class="export-buttons">
-                <button class="export-btn" onclick="exportData('visits')">Export All Websites</button>
-                <button class="export-btn" onclick="exportData('queries')">Export Queries</button>
-                <button class="export-btn" onclick="exportData('ip_cache')">Export IP Cache</button>
+            <!-- Export Buttons -->
+            <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+                <button class="btn" onclick="exportData('visits')">Export All Websites CSV</button>
+                <button class="btn" onclick="exportData('queries')">Export Queries CSV</button>
+                <button class="btn" onclick="exportData('ip_cache')">Export IP Cache CSV</button>
             </div>
         </div>
     </div>
+
+    <!-- Tooltip for expanded content -->
+    <div class="tooltip" id="tooltip"></div>
 
     <script>
         // Configuration
         const API_URL = 'https://api.reisig.org';
         let authToken = null;
         let currentTab = 'visits';
-        let currentData = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let allData = [];
         let charts = {};
         let map = null;
 
@@ -456,7 +560,7 @@
                     errorDiv.textContent = 'Invalid password';
                 }
             } catch (error) {
-                errorDiv.textContent = 'Connection error';
+                errorDiv.textContent = 'Connection error: ' + error.message;
             }
         }
 
@@ -468,8 +572,9 @@
         }
 
         // Tab switching
-        function switchTab(tab, label) {
+        function switchTab(tab) {
             currentTab = tab;
+            currentPage = 1;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
             
@@ -479,55 +584,87 @@
                 document.getElementById('chartsSection').style.display = 'none';
                 document.getElementById('dataTableContainer').style.display = 'none';
                 document.getElementById('statsGrid').style.display = 'none';
+                document.getElementById('filtersSection').style.display = 'none';
                 loadFiles();
             } else {
                 document.getElementById('fileManager').style.display = 'none';
                 document.getElementById('chartsSection').style.display = 'block';
                 document.getElementById('dataTableContainer').style.display = 'block';
                 document.getElementById('statsGrid').style.display = 'grid';
+                document.getElementById('filtersSection').style.display = 'grid';
                 loadData();
             }
         }
 
         // Apply filters
         function applyFilters() {
+            currentPage = 1;
             loadData();
+        }
+
+        // Change page
+        function changePage(direction) {
+            const newPage = currentPage + direction;
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                loadData();
+            }
         }
 
         // Load data
         async function loadData() {
-            const source = document.getElementById('sourceFilter').value;
-            const dateFrom = document.getElementById('dateFrom').value;
-            const dateTo = document.getElementById('dateTo').value;
-            
             const params = new URLSearchParams({
                 token: authToken,
-                type: currentTab === 'files' ? 'visits' : currentTab,
-                ...(source && { source }),
-                ...(dateFrom && { start: dateFrom }),
-                ...(dateTo && { end: dateTo })
+                type: currentTab,
+                page: currentPage,
+                limit: 50,
+                source: document.getElementById('sourceFilter').value,
+                ip: document.getElementById('ipFilter').value,
+                country: document.getElementById('countryFilter').value,
+                start: document.getElementById('dateFrom').value,
+                end: document.getElementById('dateTo').value
+            });
+
+            // Remove empty params
+            Array.from(params.keys()).forEach(key => {
+                if (!params.get(key)) params.delete(key);
             });
 
             try {
                 const response = await fetch(`${API_URL}/monitor/data?${params}`);
                 if (!response.ok) throw new Error('Failed to fetch data');
                 
-                currentData = await response.json();
-                updateDashboard();
+                const result = await response.json();
+                allData = result.data || [];
+                totalPages = result.pages || 1;
+                currentPage = result.page || 1;
+                
+                // Load all data for charts (separate request without pagination)
+                const allParams = new URLSearchParams(params);
+                allParams.set('limit', '10000');
+                allParams.delete('page');
+                
+                const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
+                const allResult = await allResponse.json();
+                
+                updateDashboard(allResult.data || []);
+                updateTable(allData);
+                updatePagination();
             } catch (error) {
                 console.error('Error loading data:', error);
+                alert('Failed to load data: ' + error.message);
             }
         }
 
         // Update dashboard
-        function updateDashboard() {
+        function updateDashboard(data) {
             const uniqueIPs = new Set();
             const countriesSet = new Set();
             const dailyActivity = new Map();
             const today = new Date().toDateString();
             let todayCount = 0;
 
-            currentData.forEach(entry => {
+            data.forEach(entry => {
                 uniqueIPs.add(entry.ip);
                 if (entry.country && entry.country !== 'Unknown') {
                     countriesSet.add(entry.country);
@@ -542,16 +679,15 @@
             });
 
             // Update stats
-            document.getElementById('totalEntries').textContent = currentData.length;
-            document.getElementById('uniqueVisitors').textContent = uniqueIPs.size;
+            document.getElementById('totalEntries').textContent = data.length;
+            document.getElementById('uniqueIPs').textContent = uniqueIPs.size;
             document.getElementById('countries').textContent = countriesSet.size;
             document.getElementById('todayCount').textContent = todayCount;
 
             // Update charts
             updateActivityChart(dailyActivity);
-            updateCountriesChart();
-            updateMap();
-            updateTable();
+            updateCountriesChart(data);
+            updateMap(data);
         }
 
         // Activity chart
@@ -560,7 +696,10 @@
             
             if (charts.activity) charts.activity.destroy();
             
-            const labels = Array.from(dailyActivity.keys()).slice(-30);
+            const sortedDates = Array.from(dailyActivity.keys()).sort((a, b) => 
+                new Date(a) - new Date(b)
+            );
+            const labels = sortedDates.slice(-30);
             const data = labels.map(label => dailyActivity.get(label));
 
             charts.activity = new Chart(ctx, {
@@ -586,7 +725,11 @@
                         },
                         x: {
                             grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            ticks: { color: '#a0a0a0' }
+                            ticks: { 
+                                color: '#a0a0a0',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
                         }
                     }
                 }
@@ -594,13 +737,13 @@
         }
 
         // Countries chart
-        function updateCountriesChart() {
+        function updateCountriesChart(data) {
             const ctx = document.getElementById('countriesChart').getContext('2d');
             
             if (charts.countries) charts.countries.destroy();
             
             const countries = {};
-            currentData.forEach(entry => {
+            data.forEach(entry => {
                 if (entry.country && entry.country !== 'Unknown') {
                     countries[entry.country] = (countries[entry.country] || 0) + 1;
                 }
@@ -615,7 +758,7 @@
                 data: {
                     labels: sorted.map(([country]) => country),
                     datasets: [{
-                        label: 'Visitors',
+                        label: 'Entries',
                         data: sorted.map(([, count]) => count),
                         backgroundColor: '#00BFFF'
                     }]
@@ -639,7 +782,7 @@
         }
 
         // Map
-        function updateMap() {
+        function updateMap(data) {
             if (map) map.remove();
             
             map = L.map('map').setView([30, 0], 2);
@@ -648,85 +791,131 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            currentData.forEach(entry => {
-                if (entry.latitude && entry.longitude) {
-                    const marker = L.circleMarker([entry.latitude, entry.longitude], {
-                        radius: 5,
-                        fillColor: '#00BFFF',
-                        color: '#fff',
-                        weight: 1,
-                        opacity: 1,
-                        fillOpacity: 0.6
-                    }).addTo(map);
-                    
-                    marker.bindPopup(`
-                        ${entry.city || 'Unknown'}, ${entry.country || 'Unknown'}<br>
-                        IP: ${entry.ip}<br>
-                        Language: ${entry.language}
-                    `);
+            // Group by location
+            const locations = {};
+            data.forEach(entry => {
+                if (entry.latitude && entry.longitude && 
+                    entry.latitude !== '0' && entry.longitude !== '0') {
+                    const key = `${entry.latitude},${entry.longitude}`;
+                    if (!locations[key]) {
+                        locations[key] = {
+                            lat: parseFloat(entry.latitude),
+                            lng: parseFloat(entry.longitude),
+                            city: entry.city,
+                            country: entry.country,
+                            count: 0,
+                            ips: new Set()
+                        };
+                    }
+                    locations[key].count++;
+                    locations[key].ips.add(entry.ip);
                 }
+            });
+
+            // Add markers
+            Object.values(locations).forEach(loc => {
+                const marker = L.circleMarker([loc.lat, loc.lng], {
+                    radius: Math.min(5 + Math.log(loc.count) * 2, 20),
+                    fillColor: '#00BFFF',
+                    color: '#fff',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.6
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <strong>${loc.city || 'Unknown'}, ${loc.country || 'Unknown'}</strong><br>
+                    Entries: ${loc.count}<br>
+                    Unique IPs: ${loc.ips.size}
+                `);
             });
         }
 
-        // Table
-        function updateTable() {
+        // Update table
+        function updateTable(data) {
             const headers = document.getElementById('tableHeaders');
             const body = document.getElementById('tableBody');
             
             // Set headers based on tab
             if (currentTab === 'visits') {
                 headers.innerHTML = `
-                    <th>Time</th>
+                    <th>Timestamp</th>
                     <th>IP</th>
-                    <th>Language</th>
                     <th>X-Forwarded</th>
+                    <th>Language</th>
+                    <th>User Agent</th>
+                    <th>Referer</th>
+                    <th>Source</th>
                     <th>Country</th>
                     <th>City</th>
+                    <th>Region</th>
                     <th>ISP</th>
-                    <th>Source</th>
                 `;
             } else {
                 headers.innerHTML = `
-                    <th>Time</th>
+                    <th>Timestamp</th>
                     <th>IP</th>
+                    <th>X-Forwarded</th>
                     <th>Language</th>
-                    <th>Country</th>
-                    <th>City</th>
                     <th>Query</th>
                     <th>Response</th>
+                    <th>Country</th>
+                    <th>City</th>
+                    <th>ISP</th>
                 `;
             }
             
-            // Populate table - show ALL entries
+            // Clear and populate table
             body.innerHTML = '';
-            const recent = currentData.slice(-100).reverse();
             
-            recent.forEach(entry => {
+            // Sort by timestamp descending
+            const sortedData = [...data].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            sortedData.forEach(entry => {
                 const row = body.insertRow();
                 
                 if (currentTab === 'visits') {
                     row.innerHTML = `
                         <td>${new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>${entry.ip}</td>
-                        <td>${entry.language?.substring(0, 20)}</td>
-                        <td>${entry.x_forwarded_for?.substring(0, 20)}</td>
-                        <td>${entry.country || 'Unknown'}</td>
-                        <td>${entry.city || 'Unknown'}</td>
-                        <td>${entry.isp?.substring(0, 30) || 'Unknown'}</td>
-                        <td>${entry.source}</td>
+                        <td>${entry.ip || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.x_forwarded_for || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.user_agent || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.referer || ''}</td>
+                        <td>${entry.source || ''}</td>
+                        <td>${entry.country || ''}</td>
+                        <td>${entry.city || ''}</td>
+                        <td>${entry.region || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
                     `;
                 } else {
                     row.innerHTML = `
                         <td>${new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>${entry.ip}</td>
-                        <td>${entry.language?.substring(0, 20)}</td>
-                        <td>${entry.country || 'Unknown'}</td>
-                        <td>${entry.city || 'Unknown'}</td>
-                        <td>${entry.query?.substring(0, 50)}...</td>
-                        <td>${entry.response?.substring(0, 50)}...</td>
+                        <td>${entry.ip || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.x_forwarded_for || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.query || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.response || ''}</td>
+                        <td>${entry.country || ''}</td>
+                        <td>${entry.city || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
                     `;
                 }
             });
+        }
+
+        // Toggle expand cell
+        function toggleExpand(cell) {
+            cell.classList.toggle('expanded');
+        }
+
+        // Update pagination
+        function updatePagination() {
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevBtn').disabled = currentPage <= 1;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
         }
 
         // File management
@@ -741,18 +930,24 @@
                 
                 files.forEach(file => {
                     const row = tbody.insertRow();
+                    const sizeKB = (file.size / 1024).toFixed(2);
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    const displaySize = file.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+                    
                     row.innerHTML = `
                         <td>${file.name}</td>
-                        <td>${(file.size / 1024).toFixed(2)} KB</td>
+                        <td>${displaySize}</td>
                         <td>${new Date(file.modified).toLocaleString()}</td>
                         <td>
-                            <button class="export-btn" onclick="downloadFile('${file.name}')">Download</button>
-                            <button class="delete-btn" onclick="deleteFile('${file.name}')">Delete</button>
+                            <button class="btn" onclick="downloadFile('${file.name}')">Download</button>
+                            ${!['visits.csv', 'queries.csv', 'ip_cache.csv'].includes(file.name) ? 
+                              `<button class="btn btn-danger" onclick="deleteFile('${file.name}')">Delete</button>` : ''}
                         </td>
                     `;
                 });
             } catch (error) {
                 console.error('Error loading files:', error);
+                alert('Failed to load files: ' + error.message);
             }
         }
 
@@ -783,17 +978,18 @@
                         loadFiles();
                         fileInput.value = '';
                     } else {
-                        alert('Upload failed');
+                        const error = await response.json();
+                        alert('Upload failed: ' + error.error);
                     }
                 } catch (error) {
-                    alert('Upload error');
+                    alert('Upload error: ' + error.message);
                 }
             };
             reader.readAsText(file);
         }
 
         async function deleteFile(filename) {
-            if (!confirm(`Delete ${filename}?`)) return;
+            if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
             
             try {
                 const response = await fetch(`${API_URL}/monitor/file/${filename}?token=${authToken}`, {
@@ -801,22 +997,24 @@
                 });
                 
                 if (response.ok) {
+                    alert('File deleted successfully');
                     loadFiles();
                 } else {
-                    alert('Delete failed');
+                    const error = await response.json();
+                    alert('Delete failed: ' + error.error);
                 }
             } catch (error) {
-                alert('Delete error');
+                alert('Delete error: ' + error.message);
             }
         }
 
         function downloadFile(filename) {
-            window.location.href = `${API_URL}/monitor/export/${filename.replace('.csv', '')}?token=${authToken}`;
+            window.open(`${API_URL}/monitor/download/${filename}?token=${authToken}`, '_blank');
         }
 
         // Export data
-        async function exportData(type) {
-            window.location.href = `${API_URL}/monitor/export/${type}?token=${authToken}`;
+        function exportData(type) {
+            window.open(`${API_URL}/monitor/download/${type}.csv?token=${authToken}`, '_blank');
         }
     </script>
 </body>
