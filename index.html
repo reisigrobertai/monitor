@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +16,7 @@
             --text-secondary: #a0a0a0;
             --accent: #00BFFF;
             --border: rgba(255, 255, 255, 0.1);
+            --danger: #ff4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Login Screen */
         .login-container {
             display: flex;
             align-items: center;
@@ -76,9 +75,8 @@
 
         .login-button:hover { opacity: 0.8; }
 
-        .error { color: #ff4444; text-align: center; margin-top: 1rem; }
+        .error { color: var(--danger); text-align: center; margin-top: 1rem; }
 
-        /* Dashboard */
         .dashboard {
             display: none;
             min-height: 100vh;
@@ -106,16 +104,16 @@
 
         .container {
             padding: 2rem;
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
-        /* Tabs */
         .tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
         }
 
         .tab {
@@ -142,7 +140,6 @@
             background: var(--accent);
         }
 
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -169,7 +166,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Charts */
         .chart-container {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
@@ -190,13 +186,13 @@
             margin-top: 1rem;
         }
 
-        /* Table */
         .table-container {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 1.5rem;
             overflow-x: auto;
+            margin-bottom: 1.5rem;
         }
 
         table {
@@ -208,6 +204,7 @@
             padding: 0.75rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
         }
 
         th {
@@ -219,23 +216,14 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .count-badge {
-            background: var(--accent);
-            color: var(--bg-primary);
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        /* Export Buttons */
         .export-buttons {
             display: flex;
             gap: 1rem;
             margin-top: 2rem;
+            flex-wrap: wrap;
         }
 
-        .export-btn {
+        .export-btn, .file-btn {
             background: var(--accent);
             border: none;
             color: var(--bg-primary);
@@ -245,9 +233,18 @@
             transition: opacity 0.3s;
         }
 
-        .export-btn:hover { opacity: 0.8; }
+        .export-btn:hover, .file-btn:hover { opacity: 0.8; }
 
-        /* Filters */
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
         .filters {
             display: flex;
             gap: 1rem;
@@ -272,6 +269,23 @@
             border: 1px solid var(--border);
             border-radius: 4px;
             color: var(--text-primary);
+        }
+
+        .file-manager {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .file-upload {
+            margin: 1rem 0;
+        }
+
+        .file-input {
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -324,48 +338,71 @@
 
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('visits')">Visits</button>
-                <button class="tab" onclick="switchTab('queries')">Queries</button>
+                <button class="tab active" onclick="switchTab('visits', 'All Websites')">All Websites</button>
+                <button class="tab" onclick="switchTab('queries', 'Homepage Queries')">Homepage Queries</button>
+                <button class="tab" onclick="switchTab('files', 'File Manager')">File Manager</button>
             </div>
 
             <!-- Stats -->
-            <div class="stats-grid">
+            <div class="stats-grid" id="statsGrid">
                 <div class="stat-card">
-                    <div class="stat-value" id="totalVisits">0</div>
-                    <div class="stat-label">Total Visits</div>
+                    <div class="stat-value" id="totalEntries">0</div>
+                    <div class="stat-label">Total Entries</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="uniqueVisitors">0</div>
-                    <div class="stat-label">Unique Visitors</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalQueries">0</div>
-                    <div class="stat-label">Total Queries</div>
+                    <div class="stat-label">Unique IPs</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="countries">0</div>
                     <div class="stat-label">Countries</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayCount">0</div>
+                    <div class="stat-label">Today</div>
+                </div>
             </div>
 
             <!-- Charts -->
-            <div class="chart-container">
-                <h3 class="chart-title">Activity Over Time</h3>
-                <canvas id="activityChart"></canvas>
+            <div id="chartsSection">
+                <div class="chart-container">
+                    <h3 class="chart-title">Activity Over Time</h3>
+                    <canvas id="activityChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Visitor Locations</h3>
+                    <div id="map"></div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title">Top Countries</h3>
+                    <canvas id="countriesChart"></canvas>
+                </div>
             </div>
 
-            <div class="chart-container">
-                <h3 class="chart-title">Visitor Locations</h3>
-                <div id="map"></div>
+            <!-- File Manager -->
+            <div class="file-manager" id="fileManager">
+                <h3 class="chart-title">Storage Files</h3>
+                <div class="file-upload">
+                    <input type="file" id="fileInput" class="file-input">
+                    <button class="file-btn" onclick="uploadFile()">Upload File</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Filename</th>
+                            <th>Size</th>
+                            <th>Modified</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesTableBody"></tbody>
+                </table>
             </div>
 
-            <div class="chart-container">
-                <h3 class="chart-title">Top Countries</h3>
-                <canvas id="countriesChart"></canvas>
-            </div>
-
-            <!-- Table -->
-            <div class="table-container">
+            <!-- Data Table -->
+            <div class="table-container" id="dataTableContainer">
                 <h3 class="chart-title">Recent Activity</h3>
                 <table>
                     <thead>
@@ -377,7 +414,7 @@
 
             <!-- Export -->
             <div class="export-buttons">
-                <button class="export-btn" onclick="exportData('visits')">Export Visits</button>
+                <button class="export-btn" onclick="exportData('visits')">Export All Websites</button>
                 <button class="export-btn" onclick="exportData('queries')">Export Queries</button>
                 <button class="export-btn" onclick="exportData('ip_cache')">Export IP Cache</button>
             </div>
@@ -431,11 +468,25 @@
         }
 
         // Tab switching
-        function switchTab(tab) {
+        function switchTab(tab, label) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            loadData();
+            
+            // Show/hide sections
+            if (tab === 'files') {
+                document.getElementById('fileManager').style.display = 'block';
+                document.getElementById('chartsSection').style.display = 'none';
+                document.getElementById('dataTableContainer').style.display = 'none';
+                document.getElementById('statsGrid').style.display = 'none';
+                loadFiles();
+            } else {
+                document.getElementById('fileManager').style.display = 'none';
+                document.getElementById('chartsSection').style.display = 'block';
+                document.getElementById('dataTableContainer').style.display = 'block';
+                document.getElementById('statsGrid').style.display = 'grid';
+                loadData();
+            }
         }
 
         // Apply filters
@@ -451,7 +502,7 @@
             
             const params = new URLSearchParams({
                 token: authToken,
-                type: currentTab,
+                type: currentTab === 'files' ? 'visits' : currentTab,
                 ...(source && { source }),
                 ...(dateFrom && { start: dateFrom }),
                 ...(dateTo && { end: dateTo })
@@ -470,11 +521,11 @@
 
         // Update dashboard
         function updateDashboard() {
-            // Calculate stats
             const uniqueIPs = new Set();
             const countriesSet = new Set();
             const dailyActivity = new Map();
-            let totalQueries = 0;
+            const today = new Date().toDateString();
+            let todayCount = 0;
 
             currentData.forEach(entry => {
                 uniqueIPs.add(entry.ip);
@@ -483,19 +534,18 @@
                 }
                 
                 const date = new Date(entry.timestamp).toLocaleDateString();
-                const currentCount = dailyActivity.get(date) || 0;
-                dailyActivity.set(date, currentCount + (entry.count || 1));
+                dailyActivity.set(date, (dailyActivity.get(date) || 0) + 1);
                 
-                if (currentTab === 'queries') totalQueries++;
+                if (new Date(entry.timestamp).toDateString() === today) {
+                    todayCount++;
+                }
             });
 
             // Update stats
-            document.getElementById('totalVisits').textContent = 
-                currentData.reduce((sum, entry) => sum + (entry.count || 1), 0);
+            document.getElementById('totalEntries').textContent = currentData.length;
             document.getElementById('uniqueVisitors').textContent = uniqueIPs.size;
-            document.getElementById('totalQueries').textContent = 
-                currentTab === 'queries' ? currentData.length : totalQueries;
             document.getElementById('countries').textContent = countriesSet.size;
+            document.getElementById('todayCount').textContent = todayCount;
 
             // Update charts
             updateActivityChart(dailyActivity);
@@ -552,7 +602,7 @@
             const countries = {};
             currentData.forEach(entry => {
                 if (entry.country && entry.country !== 'Unknown') {
-                    countries[entry.country] = (countries[entry.country] || 0) + (entry.count || 1);
+                    countries[entry.country] = (countries[entry.country] || 0) + 1;
                 }
             });
             
@@ -601,7 +651,7 @@
             currentData.forEach(entry => {
                 if (entry.latitude && entry.longitude) {
                     const marker = L.circleMarker([entry.latitude, entry.longitude], {
-                        radius: Math.min(5 + (entry.count || 1), 15),
+                        radius: 5,
                         fillColor: '#00BFFF',
                         color: '#fff',
                         weight: 1,
@@ -611,7 +661,8 @@
                     
                     marker.bindPopup(`
                         ${entry.city || 'Unknown'}, ${entry.country || 'Unknown'}<br>
-                        Visits: ${entry.count || 1}
+                        IP: ${entry.ip}<br>
+                        Language: ${entry.language}
                     `);
                 }
             });
@@ -626,24 +677,29 @@
             if (currentTab === 'visits') {
                 headers.innerHTML = `
                     <th>Time</th>
-                    <th>Count</th>
                     <th>IP</th>
+                    <th>Language</th>
+                    <th>X-Forwarded</th>
                     <th>Country</th>
                     <th>City</th>
+                    <th>ISP</th>
                     <th>Source</th>
                 `;
             } else {
                 headers.innerHTML = `
                     <th>Time</th>
                     <th>IP</th>
+                    <th>Language</th>
+                    <th>Country</th>
+                    <th>City</th>
                     <th>Query</th>
                     <th>Response</th>
                 `;
             }
             
-            // Populate table
+            // Populate table - show ALL entries
             body.innerHTML = '';
-            const recent = currentData.slice(-50).reverse();
+            const recent = currentData.slice(-100).reverse();
             
             recent.forEach(entry => {
                 const row = body.insertRow();
@@ -651,16 +707,21 @@
                 if (currentTab === 'visits') {
                     row.innerHTML = `
                         <td>${new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>${entry.count > 1 ? `<span class="count-badge">${entry.count}</span>` : '1'}</td>
                         <td>${entry.ip}</td>
+                        <td>${entry.language?.substring(0, 20)}</td>
+                        <td>${entry.x_forwarded_for?.substring(0, 20)}</td>
                         <td>${entry.country || 'Unknown'}</td>
                         <td>${entry.city || 'Unknown'}</td>
+                        <td>${entry.isp?.substring(0, 30) || 'Unknown'}</td>
                         <td>${entry.source}</td>
                     `;
                 } else {
                     row.innerHTML = `
                         <td>${new Date(entry.timestamp).toLocaleString()}</td>
                         <td>${entry.ip}</td>
+                        <td>${entry.language?.substring(0, 20)}</td>
+                        <td>${entry.country || 'Unknown'}</td>
+                        <td>${entry.city || 'Unknown'}</td>
                         <td>${entry.query?.substring(0, 50)}...</td>
                         <td>${entry.response?.substring(0, 50)}...</td>
                     `;
@@ -668,10 +729,94 @@
             });
         }
 
+        // File management
+        async function loadFiles() {
+            try {
+                const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
+                if (!response.ok) throw new Error('Failed to fetch files');
+                
+                const files = await response.json();
+                const tbody = document.getElementById('filesTableBody');
+                tbody.innerHTML = '';
+                
+                files.forEach(file => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${file.name}</td>
+                        <td>${(file.size / 1024).toFixed(2)} KB</td>
+                        <td>${new Date(file.modified).toLocaleString()}</td>
+                        <td>
+                            <button class="export-btn" onclick="downloadFile('${file.name}')">Download</button>
+                            <button class="delete-btn" onclick="deleteFile('${file.name}')">Delete</button>
+                        </td>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading files:', error);
+            }
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const response = await fetch(`${API_URL}/monitor/upload`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: authToken,
+                            filename: file.name,
+                            content: e.target.result
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('File uploaded successfully');
+                        loadFiles();
+                        fileInput.value = '';
+                    } else {
+                        alert('Upload failed');
+                    }
+                } catch (error) {
+                    alert('Upload error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function deleteFile(filename) {
+            if (!confirm(`Delete ${filename}?`)) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/monitor/file/${filename}?token=${authToken}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadFiles();
+                } else {
+                    alert('Delete failed');
+                }
+            } catch (error) {
+                alert('Delete error');
+            }
+        }
+
+        function downloadFile(filename) {
+            window.location.href = `${API_URL}/monitor/export/${filename.replace('.csv', '')}?token=${authToken}`;
+        }
+
         // Export data
         async function exportData(type) {
-            const params = new URLSearchParams({ token: authToken });
-            window.location.href = `${API_URL}/monitor/export/${type}?${params}`;
+            window.location.href = `${API_URL}/monitor/export/${type}?token=${authToken}`;
         }
     </script>
 </body>
