@@ -783,7 +783,7 @@
         }
 
         // Load data
-        async function loadData() {
+async function loadData() {
     const params = new URLSearchParams({
         token: authToken,
         type: currentTab,
@@ -795,9 +795,12 @@
         end: document.getElementById('dateTo').value
     });
     
-    // Only add source filter if not on queries tab
+    // Only add referer filter if not on queries tab (using 'referer' instead of 'source')
     if (currentTab !== 'queries') {
-        params.append('source', document.getElementById('sourceFilter').value);
+        const sourceValue = document.getElementById('sourceFilter').value;
+        if (sourceValue) {
+            params.append('referer', sourceValue);
+        }
     }
 
     // Remove empty params
@@ -818,7 +821,7 @@
         const allParams = new URLSearchParams(params);
         allParams.set('limit', '10000');
         allParams.delete('page');
-        allParams.delete('source'); // Remove source filter to get all sources
+        allParams.delete('referer'); // Remove referer filter to get all sources
         
         const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
         const allResult = await allResponse.json();
@@ -835,6 +838,7 @@
         console.error('Error loading data:', error);
     }
 }
+
 
         // Update source filter dropdown
 function updateSourceFilter(data) {
