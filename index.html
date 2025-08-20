@@ -782,64 +782,6 @@
             }
         }
 
-        // Load data
-async function loadData() {
-    const params = new URLSearchParams({
-        token: authToken,
-        type: currentTab,
-        page: currentPage,
-        limit: 50,
-        ip: document.getElementById('ipFilter').value,
-        country: document.getElementById('countryFilter').value,
-        start: document.getElementById('dateFrom').value,
-        end: document.getElementById('dateTo').value
-    });
-    
-    // Only add referer filter if not on queries tab (using 'referer' instead of 'source')
-    if (currentTab !== 'queries') {
-        const sourceValue = document.getElementById('sourceFilter').value;
-        if (sourceValue) {
-            params.append('referer', sourceValue);
-        }
-    }
-
-    // Remove empty params
-    Array.from(params.keys()).forEach(key => {
-        if (!params.get(key)) params.delete(key);
-    });
-
-    try {
-        const response = await fetch(`${API_URL}/monitor/data?${params}`);
-        if (!response.ok) throw new Error('Failed to fetch data');
-        
-        const result = await response.json();
-        allData = result.data || [];
-        totalPages = result.pages || 1;
-        currentPage = result.page || 1;
-        
-        // Load all data for charts and source filter
-        const allParams = new URLSearchParams(params);
-        allParams.set('limit', '10000');
-        allParams.delete('page');
-        allParams.delete('referer'); // Remove referer filter to get all sources
-        
-        const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
-        const allResult = await allResponse.json();
-        
-        // Update source filter dropdown with actual sources
-        if (currentTab === 'visits') {
-            updateSourceFilter(allResult.data || []);
-        }
-        
-        updateDashboard(allResult.data || []);
-        updateTable(allData);
-        updatePagination();
-    } catch (error) {
-        console.error('Error loading data:', error);
-    }
-}
-
-
         // Update source filter dropdown
 function updateSourceFilter(data) {
     const sourceFilter = document.getElementById('sourceFilter');
@@ -1183,8 +1125,8 @@ function updateSourceFilter(data) {
             document.getElementById('nextBtn').disabled = currentPage >= totalPages;
         }
 
-        // File management
-        async function loadData() {
+        // Load data - CORRECTED VERSION (replace both existing loadData functions with this one)
+async function loadData() {
     const params = new URLSearchParams({
         token: authToken,
         type: currentTab,
@@ -1196,11 +1138,11 @@ function updateSourceFilter(data) {
         end: document.getElementById('dateTo').value
     });
     
-    // Only add source filter if not on queries tab
+    // Only add source filter if not on queries tab - USING CORRECT PARAMETER NAME
     if (currentTab !== 'queries') {
         const sourceValue = document.getElementById('sourceFilter').value;
         if (sourceValue) {
-            params.append('source', sourceValue);
+            params.append('source', sourceValue); // CORRECT: using 'source', not 'referer'
         }
     }
 
@@ -1222,7 +1164,7 @@ function updateSourceFilter(data) {
         const allParams = new URLSearchParams(params);
         allParams.set('limit', '10000');
         allParams.delete('page');
-        allParams.delete('source'); // Remove source filter to get all sources
+        allParams.delete('source'); // Remove source filter to get all sources for dropdown
         
         const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
         const allResult = await allResponse.json();
@@ -1239,6 +1181,7 @@ function updateSourceFilter(data) {
         console.error('Error loading data:', error);
     }
 }
+
 
         async function uploadFile() {
             const fileInput = document.getElementById('fileInput');
