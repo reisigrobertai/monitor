@@ -560,9 +560,8 @@
                 <div class="filter-group" id="sourceFilterGroup">
                     <label class="filter-label">Source</label>
                     <select class="filter-input" id="sourceFilter">
-                        <option value="">All Sources</option>
-                        <option value="reisig.org">reisig.org</option>
-                    </select>
+    <option value="">All Sources</option>
+</select>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">IP Address</label>
@@ -785,51 +784,91 @@
 
         // Load data
         async function loadData() {
-            const params = new URLSearchParams({
-                token: authToken,
-                type: currentTab,
-                page: currentPage,
-                limit: 50,
-                ip: document.getElementById('ipFilter').value,
-                country: document.getElementById('countryFilter').value,
-                start: document.getElementById('dateFrom').value,
-                end: document.getElementById('dateTo').value
-            });
-            
-            // Only add source filter if not on queries tab
-            if (currentTab !== 'queries') {
-                params.append('source', document.getElementById('sourceFilter').value);
-            }
+    const params = new URLSearchParams({
+        token: authToken,
+        type: currentTab,
+        page: currentPage,
+        limit: 50,
+        ip: document.getElementById('ipFilter').value,
+        country: document.getElementById('countryFilter').value,
+        start: document.getElementById('dateFrom').value,
+        end: document.getElementById('dateTo').value
+    });
+    
+    // Only add source filter if not on queries tab
+    if (currentTab !== 'queries') {
+        params.append('source', document.getElementById('sourceFilter').value);
+    }
 
-            // Remove empty params
-            Array.from(params.keys()).forEach(key => {
-                if (!params.get(key)) params.delete(key);
-            });
+    // Remove empty params
+    Array.from(params.keys()).forEach(key => {
+        if (!params.get(key)) params.delete(key);
+    });
 
-            try {
-                const response = await fetch(`${API_URL}/monitor/data?${params}`);
-                if (!response.ok) throw new Error('Failed to fetch data');
-                
-                const result = await response.json();
-                allData = result.data || [];
-                totalPages = result.pages || 1;
-                currentPage = result.page || 1;
-                
-                // Load all data for charts
-                const allParams = new URLSearchParams(params);
-                allParams.set('limit', '10000');
-                allParams.delete('page');
-                
-                const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
-                const allResult = await allResponse.json();
-                
-                updateDashboard(allResult.data || []);
-                updateTable(allData);
-                updatePagination();
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
+    try {
+        const response = await fetch(`${API_URL}/monitor/data?${params}`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const result = await response.json();
+        allData = result.data || [];
+        totalPages = result.pages || 1;
+        currentPage = result.page || 1;
+        
+        // Load all data for charts and source filter
+        const allParams = new URLSearchParams(params);
+        allParams.set('limit', '10000');
+        allParams.delete('page');
+        allParams.delete('source'); // Remove source filter to get all sources
+        
+        const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
+        const allResult = await allResponse.json();
+        
+        // Update source filter dropdown with actual sources
+        if (currentTab === 'visits') {
+            updateSourceFilter(allResult.data || []);
         }
+        
+        updateDashboard(allResult.data || []);
+        updateTable(allData);
+        updatePagination();
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+}
+
+        // Update source filter dropdown
+function updateSourceFilter(data) {
+    const sourceFilter = document.getElementById('sourceFilter');
+    const currentValue = sourceFilter.value;
+    
+    // Get unique sources/referers
+    const sources = new Set();
+    data.forEach(entry => {
+        if (entry.referer && entry.referer.trim() !== '') {
+            sources.add(entry.referer);
+        }
+    });
+    
+    // Sort sources alphabetically
+    const sortedSources = Array.from(sources).sort((a, b) => 
+        a.toLowerCase().localeCompare(b.toLowerCase())
+    );
+    
+    // Clear and rebuild dropdown
+    sourceFilter.innerHTML = '<option value="">All Sources</option>';
+    
+    sortedSources.forEach(source => {
+        const option = document.createElement('option');
+        option.value = source;
+        option.textContent = source;
+        sourceFilter.appendChild(option);
+    });
+    
+    // Restore previous selection if it still exists
+    if (currentValue && sortedSources.includes(currentValue)) {
+        sourceFilter.value = currentValue;
+    }
+}
 
         // Update dashboard
         function updateDashboard(data) {
