@@ -813,7 +813,9 @@
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Country</label>
-                    <input type="text" class="filter-input" id="countryFilter" placeholder="Filter by country">
+                    <select class="filter-input" id="countryFilter">
+                        <option value="">All Countries</option>
+                    </select>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Date From</label>
@@ -857,7 +859,7 @@
                 </div>
             </div>
 
-            <!-- Data Table (NOW AT TOP) -->
+            <!-- Data Table (AT TOP) -->
             <div class="table-container" id="dataTableContainer">
                 <h3 class="chart-title">Detailed Data</h3>
                 <div class="table-wrapper">
@@ -877,7 +879,7 @@
                 </div>
             </div>
 
-            <!-- Charts (NOW BELOW TABLE) -->
+            <!-- Charts (BELOW TABLE) -->
             <div id="chartsSection">
                 <div class="chart-container">
                     <h3 class="chart-title">Activity Over Time</h3>
@@ -932,6 +934,21 @@
         let filteredData = [];
         let charts = {};
         let map = null;
+
+        // FIXED: Source mapping - This maps the saved values back to display names
+        const SOURCE_DISPLAY_MAPPING = {
+            'delphiweis': 'Delphiweis',
+            'rheinfallspinsel': 'Rheinfallspinsel', 
+            'map-rfp': 'Map RFP',
+            'any': 'Any',
+            'qorra': 'Qorra',
+            'reisig.org': 'Reisig.org'
+        };
+
+        // Function to get display name for source
+        function getSourceDisplayName(source) {
+            return SOURCE_DISPLAY_MAPPING[source] || source || 'Unknown';
+        }
 
         // File upload handling
         document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -1012,13 +1029,11 @@
             }
         }
 
-        // Apply filters
-        function applyFilters() {
+        // Apply filters - FIXED: Now refreshes all data
+        async function applyFilters() {
             currentPage = 1;
-            filterCurrentData();
-            updateDashboard(filteredData);
-            updateTable(filteredData);
-            updatePagination();
+            // Reload fresh data from server with current filters
+            await loadData();
         }
 
         // Filter data
@@ -1064,7 +1079,7 @@
             }
         }
 
-        // Update source filter dropdown
+        // Update source filter dropdown - FIXED: Shows display names
         function updateSourceFilter(data) {
             const sourceFilter = document.getElementById('sourceFilter');
             const currentValue = sourceFilter.value;
@@ -1077,9 +1092,9 @@
                 }
             });
             
-            // Sort sources alphabetically
+            // Sort sources alphabetically by display name
             const sortedSources = Array.from(sources).sort((a, b) => 
-                a.toLowerCase().localeCompare(b.toLowerCase())
+                getSourceDisplayName(a).toLowerCase().localeCompare(getSourceDisplayName(b).toLowerCase())
             );
             
             // Clear and rebuild dropdown
@@ -1088,13 +1103,48 @@
             sortedSources.forEach(source => {
                 const option = document.createElement('option');
                 option.value = source;
-                option.textContent = source;
+                option.textContent = getSourceDisplayName(source); // FIXED: Show display name
                 sourceFilter.appendChild(option);
             });
             
             // Restore previous selection if it still exists
             if (currentValue && sortedSources.includes(currentValue)) {
                 sourceFilter.value = currentValue;
+            }
+        }
+
+        // Update country filter dropdown - NEW FEATURE
+        function updateCountryFilter(data) {
+            const countryFilter = document.getElementById('countryFilter');
+            const currentValue = countryFilter.value;
+            
+            // Get unique countries
+            const countries = new Set();
+            data.forEach(entry => {
+                if (entry.country && entry.country.trim() !== '' && 
+                    entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
+                    countries.add(entry.country);
+                }
+            });
+            
+            // Sort countries alphabetically
+            const sortedCountries = Array.from(countries).sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            
+            // Clear and rebuild dropdown
+            countryFilter.innerHTML = '<option value="">All Countries</option>';
+            
+            sortedCountries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countryFilter.appendChild(option);
+            });
+            
+            // Restore previous selection if it still exists
+            if (currentValue && sortedCountries.includes(currentValue)) {
+                countryFilter.value = currentValue;
             }
         }
 
@@ -1297,36 +1347,38 @@
             });
         }
 
-        // Update table with proper pagination
+        // Update table - FIXED: New header order + display names for sources
         function updateTable(data) {
             const headers = document.getElementById('tableHeaders');
             const body = document.getElementById('tableBody');
             
-            // Set headers based on tab
+            // FIXED: New header order as requested
             if (currentTab === 'visits') {
                 headers.innerHTML = `
                     <th>Timestamp</th>
-                    <th>IP</th>
-                    <th>Security</th>
-                    <th>Country</th>
                     <th>City</th>
                     <th>Region</th>
-                    <th>ISP</th>
-                    <th>Language</th>
-                    <th>User Agent</th>
-                    <th>Referer</th>
+                    <th>Country</th>
                     <th>Source</th>
+                    <th>Referer</th>
+                    <th>Language</th>
+                    <th>ISP</th>
+                    <th>IP</th>
+                    <th>User Agent</th>
+                    <th>Security</th>
                 `;
             } else {
                 headers.innerHTML = `
                     <th>Timestamp</th>
+                    <th>City</th>
+                    <th>Region</th>
+                    <th>Country</th>
+                    <th>Language</th>
+                    <th>ISP</th>
                     <th>IP</th>
                     <th>Security</th>
-                    <th>Country</th>
-                    <th>City</th>
                     <th>Query</th>
                     <th>Response</th>
-                    <th>Language</th>
                 `;
             }
             
@@ -1374,30 +1426,33 @@
                     securityBadges = '<span class="security-badge badge-normal">NORMAL</span>';
                 }
                 
+                // FIXED: New column order + display name for source
                 if (currentTab === 'visits') {
                     row.innerHTML = `
                         <td>${new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>${entry.ip || ''}</td>
-                        <td>${securityBadges}</td>
-                        <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
                         <td>${entry.city || ''} ${entry.postal_code || ''}</td>
                         <td>${entry.region || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.user_agent || ''}</td>
+                        <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
+                        <td>${getSourceDisplayName(entry.source)}</td>
                         <td class="expandable" onclick="toggleExpand(this)">${entry.referer || ''}</td>
-                        <td>${entry.source || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
+                        <td>${entry.ip || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.user_agent || ''}</td>
+                        <td>${securityBadges}</td>
                     `;
                 } else {
                     row.innerHTML = `
                         <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                        <td>${entry.city || ''}</td>
+                        <td>${entry.region || ''}</td>
+                        <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
+                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
                         <td>${entry.ip || ''}</td>
                         <td>${securityBadges}</td>
-                        <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
-                        <td>${entry.city || ''}</td>
                         <td class="expandable" onclick="toggleExpand(this)">${entry.query || ''}</td>
                         <td class="expandable" onclick="toggleExpand(this)">${entry.response || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
                     `;
                 }
             });
@@ -1415,15 +1470,29 @@
             document.getElementById('nextBtn').disabled = currentPage >= totalPages;
         }
 
-        // Load data - FIXED VERSION
+        // Load data - FIXED: Now properly handles filtering
         async function loadData() {
             try {
-                // Load ALL data without pagination for complete filtering
+                // Get filter values
+                const sourceFilter = document.getElementById('sourceFilter').value;
+                const ipFilter = document.getElementById('ipFilter').value;
+                const countryFilter = document.getElementById('countryFilter').value;
+                const dateFrom = document.getElementById('dateFrom').value;
+                const dateTo = document.getElementById('dateTo').value;
+
+                // Build query parameters
                 const params = new URLSearchParams({
                     token: authToken,
                     type: currentTab,
-                    limit: 100000 // Get all data
+                    limit: 100000 // Get all data for proper filtering
                 });
+
+                // Add filters to API call
+                if (sourceFilter) params.append('source', sourceFilter);
+                if (ipFilter) params.append('ip', ipFilter);
+                if (countryFilter) params.append('country', countryFilter);
+                if (dateFrom) params.append('start', dateFrom);
+                if (dateTo) params.append('end', dateTo);
 
                 const response = await fetch(`${API_URL}/monitor/data?${params}`);
                 if (!response.ok) throw new Error('Failed to fetch data');
@@ -1431,13 +1500,25 @@
                 const result = await response.json();
                 allData = result.data || [];
                 
-                // Update source filter dropdown
-                if (currentTab === 'visits') {
-                    updateSourceFilter(allData);
-                }
+                // Always load unfiltered data for dropdowns
+                const unfilteredParams = new URLSearchParams({
+                    token: authToken,
+                    type: currentTab,
+                    limit: 100000
+                });
                 
-                // Apply filters
-                filterCurrentData();
+                const unfilteredResponse = await fetch(`${API_URL}/monitor/data?${unfilteredParams}`);
+                const unfilteredResult = await unfilteredResponse.json();
+                const unfilteredData = unfilteredResult.data || [];
+                
+                // Update filter dropdowns with all available data
+                if (currentTab === 'visits') {
+                    updateSourceFilter(unfilteredData);
+                }
+                updateCountryFilter(unfilteredData);
+                
+                // Set filtered data to current results
+                filteredData = allData;
                 
                 // Update everything with filtered data
                 updateDashboard(filteredData);
@@ -1453,7 +1534,7 @@
             }
         }
 
-        // Load files - FIXED VERSION
+        // Load files - FIXED
         async function loadFiles() {
             try {
                 const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
@@ -1485,7 +1566,7 @@
             }
         }
 
-        // Upload file - FIXED VERSION
+        // Upload file
         async function uploadFile() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
@@ -1525,7 +1606,7 @@
             reader.readAsText(file);
         }
 
-        // Delete file - FIXED VERSION
+        // Delete file
         async function deleteFile(filename) {
             const isEssential = ['visits.csv', 'queries-reisig.csv', 'ip-cache.csv'].includes(filename);
             const message = isEssential 
@@ -1558,7 +1639,6 @@
 
         // Initialize on page load
         window.addEventListener('load', () => {
-            // Set initial filter state
             filteredData = allData;
         });
     </script>
