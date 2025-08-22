@@ -1518,37 +1518,47 @@
         }
     }
 
-    // File management functions
-    async function loadFiles() {
-        try {
-            const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
-            if (!response.ok) throw new Error('Failed to fetch files');
+ // File management functions
+async function loadFiles() {
+    try {
+        const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
+        if (!response.ok) throw new Error('Failed to fetch files');
+        
+        const files = await response.json();
+        const tbody = document.getElementById('filesTableBody');
+        tbody.innerHTML = '';
+        
+        files.forEach(file => {
+            const row = tbody.insertRow();
+            const sizeKB = (file.size / 1024).toFixed(2);
+            const modified = new Date(file.modified).toLocaleString();
             
-            const files = await response.json();
-            const tbody = document.getElementById('filesTableBody');
-            tbody.innerHTML = '';
+            // Style hidden files differently
+            const nameDisplay = file.hidden ? 
+                `<span style="opacity: 0.7; font-style: italic;">${file.name}</span>` : 
+                file.name;
             
-            files.forEach(file => {
-                const row = tbody.insertRow();
-                const sizeKB = (file.size / 1024).toFixed(2);
-                const modified = new Date(file.modified).toLocaleString();
-                
-                row.innerHTML = `
-                    <td>${file.name}</td>
-                    <td>${sizeKB} KB</td>
-                    <td>${modified}</td>
-                    <td>
-                        <button class="btn btn-small" onclick="downloadFile('${file.name}')">Download</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>
-                    </td>
-                `;
-            });
-        } catch (error) {
-            console.error('Error loading files:', error);
-            document.getElementById('filesTableBody').innerHTML = 
-                '<tr><td colspan="4">Error loading files</td></tr>';
-        }
+            row.innerHTML = `
+                <td>${nameDisplay}</td>
+                <td>${sizeKB} KB</td>
+                <td>${modified}</td>
+                <td>
+                    <button class="btn btn-small" onclick="downloadFile('${file.name}')">Download</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>
+                </td>
+            `;
+            
+            // Add visual indicator for hidden files
+            if (file.hidden) {
+                row.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
+            }
+        });
+    } catch (error) {
+        console.error('Error loading files:', error);
+        document.getElementById('filesTableBody').innerHTML = 
+            '<tr><td colspan="4">Error loading files</td></tr>';
     }
+}
 
     async function uploadFile() {
         const fileInput = document.getElementById('fileInput');
