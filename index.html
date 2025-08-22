@@ -1413,16 +1413,11 @@
                 securityBadges = '<span class="security-badge badge-normal">NORMAL</span>';
             }
             
-            // Add postal code if available
-            if (entry.postal_code) {
-                securityBadges += `<br><small>ZIP: ${entry.postal_code}</small>`;
-            }
-            
             if (currentTab === 'visits') {
                 row.innerHTML = `
                     <td>${new Date(entry.timestamp).toLocaleString()}</td>
                     <td>${entry.city || ''}</td>
-                    <td>${entry.region || ''}</td>
+                    <td>${entry.region || ''}${entry.postal_code ? ` (${entry.postal_code})` : ''}</td>
                     <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
                     <td>${getSourceDisplayName(entry.source)}</td>
                     <td class="expandable" onclick="toggleExpand(this)">${entry.referer || ''}</td>
@@ -1435,7 +1430,7 @@
                 row.innerHTML = `
                     <td>${new Date(entry.timestamp).toLocaleString()}</td>
                     <td>${entry.city || ''}</td>
-                    <td>${entry.region || ''}</td>
+                    <td>${entry.region || ''}${entry.postal_code ? ` (${entry.postal_code})` : ''}</td>
                     <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
                     <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
                     <td>${entry.ip || ''}</td>
