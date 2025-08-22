@@ -818,6 +818,12 @@
                     </select>
                 </div>
                 <div class="filter-group">
+                    <label class="filter-label">Referer</label>
+                    <select class="filter-input" id="refererFilter">
+                        <option value="">All Referers</option>   
+                   </select>
+                </div>
+                <div class="filter-group">
                     <label class="filter-label">Date From</label>
                     <input type="date" class="filter-input" id="dateFrom">
                 </div>
@@ -923,724 +929,699 @@
         </div>
     </div>
 
-    <script>
-        // Configuration
-        const API_URL = 'https://api.reisig.org';
-        let authToken = null;
-        let currentTab = 'visits';
-        let currentPage = 1;
-        let totalPages = 1;
-        let allData = [];
-        let filteredData = [];
-        let charts = {};
-        let map = null;
+<script>
+    // Configuration
+    const API_URL = 'https://api.reisig.org';
+    let authToken = null;
+    let currentTab = 'visits';
+    let currentPage = 1;
+    let totalPages = 1;
+    let allData = [];
+    let filteredData = [];
+    let charts = {};
+    let map = null;
 
-        // FIXED: Source mapping - This maps the saved values back to display names
-        const SOURCE_DISPLAY_MAPPING = {
-            'delphiweis': 'Delphiweis',
-            'rheinfallspinsel': 'Rheinfallspinsel', 
-            'map-rfp': 'Map RFP',
-            'any': 'Any',
-            'qorra': 'Qorra',
-            'reisig.org': 'Reisig.org'
-        };
+    // CORRECTED: Source mapping to show proper display names
+    const SOURCE_DISPLAY_MAPPING = {
+        'delphiweis': 'Delphiweis',
+        'rheinfallspinsel': 'Rheinfallspinsel', 
+        'map-rfp': 'Map RFP',
+        'any': 'Any',
+        'qorra': 'Qorra',
+        'reisig.org': 'Reisig.org',
+        'stars-api': 'Stars API' // Add any other sources you have
+    };
 
-        // Function to get display name for source
-        function getSourceDisplayName(source) {
-            return SOURCE_DISPLAY_MAPPING[source] || source || 'Unknown';
+    function getSourceDisplayName(source) {
+        return SOURCE_DISPLAY_MAPPING[source] || source || 'Unknown';
+    }
+
+    // File upload handling
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            document.getElementById('fileUploadText').textContent = `Selected: ${file.name}`;
+            document.getElementById('uploadBtn').style.display = 'inline-block';
         }
+    });
 
-        // File upload handling
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('fileUploadText').textContent = `Selected: ${file.name}`;
-                document.getElementById('uploadBtn').style.display = 'inline-block';
-            }
-        });
+    // Authentication
+    document.getElementById('passwordInput').addEventListener('keypress', e => {
+        if (e.key === 'Enter') login();
+    });
 
-        // Authentication
-        document.getElementById('passwordInput').addEventListener('keypress', e => {
-            if (e.key === 'Enter') login();
-        });
+    async function login() {
+        const password = document.getElementById('passwordInput').value;
+        const errorDiv = document.getElementById('loginError');
+        
+        try {
+            const response = await fetch(`${API_URL}/monitor/auth`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
 
-        async function login() {
-            const password = document.getElementById('passwordInput').value;
-            const errorDiv = document.getElementById('loginError');
-            
-            try {
-                const response = await fetch(`${API_URL}/monitor/auth`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    authToken = data.token;
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
-                    loadData();
-                } else {
-                    errorDiv.textContent = 'Invalid password';
-                }
-            } catch (error) {
-                errorDiv.textContent = 'Connection error: ' + error.message;
-            }
-        }
-
-        function logout() {
-            authToken = null;
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('passwordInput').value = '';
-        }
-
-        // Tab switching
-        function switchTab(tab) {
-            currentTab = tab;
-            currentPage = 1;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Show/hide source filter for queries tab
-            const sourceFilterGroup = document.getElementById('sourceFilterGroup');
-            if (tab === 'queries') {
-                sourceFilterGroup.style.display = 'none';
-            } else {
-                sourceFilterGroup.style.display = 'flex';
-            }
-            
-            // Show/hide sections
-            if (tab === 'files') {
-                document.getElementById('fileManager').style.display = 'block';
-                document.getElementById('chartsSection').style.display = 'none';
-                document.getElementById('dataTableContainer').style.display = 'none';
-                document.getElementById('statsGrid').style.display = 'none';
-                document.getElementById('filtersSection').style.display = 'none';
-                loadFiles();
-            } else {
-                document.getElementById('fileManager').style.display = 'none';
-                document.getElementById('chartsSection').style.display = 'block';
-                document.getElementById('dataTableContainer').style.display = 'block';
-                document.getElementById('statsGrid').style.display = 'grid';
-                document.getElementById('filtersSection').style.display = 'grid';
+            if (response.ok) {
+                const data = await response.json();
+                authToken = data.token;
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
                 loadData();
+            } else {
+                errorDiv.textContent = 'Invalid password';
             }
+        } catch (error) {
+            errorDiv.textContent = 'Connection error: ' + error.message;
         }
+    }
 
-        // Apply filters - FIXED: Now refreshes all data
-        async function applyFilters() {
-            currentPage = 1;
-            // Reload fresh data from server with current filters
-            await loadData();
+    function logout() {
+        authToken = null;
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('passwordInput').value = '';
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+        currentTab = tab;
+        currentPage = 1;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Show/hide source filter for queries tab
+        const sourceFilterGroup = document.getElementById('sourceFilterGroup');
+        if (tab === 'queries') {
+            sourceFilterGroup.style.display = 'none';
+        } else {
+            sourceFilterGroup.style.display = 'flex';
         }
+        
+        // Show/hide sections
+        if (tab === 'files') {
+            document.getElementById('fileManager').style.display = 'block';
+            document.getElementById('chartsSection').style.display = 'none';
+            document.getElementById('dataTableContainer').style.display = 'none';
+            document.getElementById('statsGrid').style.display = 'none';
+            document.getElementById('filtersSection').style.display = 'none';
+            loadFiles();
+        } else {
+            document.getElementById('fileManager').style.display = 'none';
+            document.getElementById('chartsSection').style.display = 'block';
+            document.getElementById('dataTableContainer').style.display = 'block';
+            document.getElementById('statsGrid').style.display = 'grid';
+            document.getElementById('filtersSection').style.display = 'grid';
+            loadData();
+        }
+    }
 
-        // Filter data
-        function filterCurrentData() {
+    // Apply filters
+    async function applyFilters() {
+        currentPage = 1;
+        await loadData();
+    }
+
+    // Change page
+    function changePage(direction) {
+        const newPage = currentPage + direction;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            updateTable(filteredData);
+            updatePagination();
+        }
+    }
+
+    // Update source filter dropdown
+    function updateSourceFilter(data) {
+        const sourceFilter = document.getElementById('sourceFilter');
+        const currentValue = sourceFilter.value;
+        
+        const sources = new Set();
+        data.forEach(entry => {
+            if (entry.source && entry.source.trim() !== '') {
+                sources.add(entry.source);
+            }
+        });
+        
+        const sortedSources = Array.from(sources).sort((a, b) => 
+            getSourceDisplayName(a).toLowerCase().localeCompare(getSourceDisplayName(b).toLowerCase())
+        );
+        
+        sourceFilter.innerHTML = '<option value="">All Sources</option>';
+        
+        sortedSources.forEach(source => {
+            const option = document.createElement('option');
+            option.value = source;
+            option.textContent = getSourceDisplayName(source);
+            sourceFilter.appendChild(option);
+        });
+        
+        if (currentValue && sortedSources.includes(currentValue)) {
+            sourceFilter.value = currentValue;
+        }
+    }
+
+    // NEW: Update referer filter dropdown
+    function updateRefererFilter(data) {
+        const refererFilter = document.getElementById('refererFilter');
+        const currentValue = refererFilter.value;
+        
+        const referers = new Set();
+        data.forEach(entry => {
+            if (entry.referer && entry.referer.trim() !== '' && entry.referer !== 'direct') {
+                // Extract domain from referer URL
+                try {
+                    const url = new URL(entry.referer);
+                    referers.add(url.hostname);
+                } catch {
+                    referers.add(entry.referer);
+                }
+            }
+        });
+        
+        const sortedReferers = Array.from(referers).sort();
+        
+        refererFilter.innerHTML = '<option value="">All Referers</option>';
+        
+        sortedReferers.forEach(referer => {
+            const option = document.createElement('option');
+            option.value = referer;
+            option.textContent = referer;
+            refererFilter.appendChild(option);
+        });
+        
+        if (currentValue && sortedReferers.includes(currentValue)) {
+            refererFilter.value = currentValue;
+        }
+    }
+
+    // Update country filter dropdown
+    function updateCountryFilter(data) {
+        const countryFilter = document.getElementById('countryFilter');
+        const currentValue = countryFilter.value;
+        
+        const countries = new Set();
+        data.forEach(entry => {
+            if (entry.country && entry.country.trim() !== '' && 
+                entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
+                countries.add(entry.country);
+            }
+        });
+        
+        const sortedCountries = Array.from(countries).sort();
+        
+        countryFilter.innerHTML = '<option value="">All Countries</option>';
+        
+        sortedCountries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            countryFilter.appendChild(option);
+        });
+        
+        if (currentValue && sortedCountries.includes(currentValue)) {
+            countryFilter.value = currentValue;
+        }
+    }
+
+    // Update dashboard
+    function updateDashboard(data) {
+        const uniqueIPs = new Set();
+        const countriesSet = new Set();
+        const dailyActivity = new Map();
+        const today = new Date().toDateString();
+        let todayCount = 0;
+        let threatCount = 0;
+        let crawlerCount = 0;
+
+        data.forEach(entry => {
+            uniqueIPs.add(entry.ip);
+            if (entry.country && entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
+                countriesSet.add(entry.country);
+            }
+            
+            const date = new Date(entry.timestamp).toLocaleDateString();
+            dailyActivity.set(date, (dailyActivity.get(date) || 0) + 1);
+            
+            if (new Date(entry.timestamp).toDateString() === today) {
+                todayCount++;
+            }
+            
+            if (entry.is_threat === 'true' || entry.is_threat === true) threatCount++;
+            if (entry.is_crawler === 'true' || entry.is_crawler === true) crawlerCount++;
+        });
+
+        // Update stats
+        document.getElementById('totalEntries').textContent = data.length.toLocaleString();
+        document.getElementById('uniqueIPs').textContent = uniqueIPs.size.toLocaleString();
+        document.getElementById('countries').textContent = countriesSet.size.toLocaleString();
+        document.getElementById('todayCount').textContent = todayCount.toLocaleString();
+        document.getElementById('threats').textContent = threatCount.toLocaleString();
+        document.getElementById('crawlers').textContent = crawlerCount.toLocaleString();
+
+        // Update charts
+        updateActivityChart(dailyActivity);
+        updateCountriesChart(data);
+        updateMap(data);
+    }
+
+    // Activity chart
+    function updateActivityChart(dailyActivity) {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        
+        if (charts.activity) charts.activity.destroy();
+        
+        const sortedDates = Array.from(dailyActivity.keys()).sort((a, b) => 
+            new Date(a) - new Date(b)
+        );
+        const labels = sortedDates.slice(-30);
+        const data = labels.map(label => dailyActivity.get(label));
+
+        charts.activity = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Activity',
+                    data,
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { 
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#8892b0' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { 
+                            color: '#8892b0',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Countries chart
+    function updateCountriesChart(data) {
+        const ctx = document.getElementById('countriesChart').getContext('2d');
+        
+        if (charts.countries) charts.countries.destroy();
+        
+        const countries = {};
+        data.forEach(entry => {
+            if (entry.country && entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
+                countries[entry.country] = (countries[entry.country] || 0) + 1;
+            }
+        });
+        
+        const sorted = Object.entries(countries)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+        charts.countries = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sorted.map(([country]) => country),
+                datasets: [{
+                    label: 'Entries',
+                    data: sorted.map(([, count]) => count),
+                    backgroundColor: 'rgba(0, 212, 255, 0.8)',
+                    borderColor: 'rgba(0, 212, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { 
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#8892b0' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#8892b0' }
+                    }
+                }
+            }
+        });
+    }
+
+    // Map
+    function updateMap(data) {
+        if (map) map.remove();
+        
+        map = L.map('map', {
+            attributionControl: false,
+            zoomControl: false
+        }).setView([30, 0], 2);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        const locations = {};
+        data.forEach(entry => {
+            if (entry.latitude && entry.longitude && 
+                entry.latitude !== '0' && entry.longitude !== '0') {
+                const key = `${entry.latitude},${entry.longitude}`;
+                if (!locations[key]) {
+                    locations[key] = {
+                        lat: parseFloat(entry.latitude),
+                        lng: parseFloat(entry.longitude),
+                        city: entry.city,
+                        country: entry.country,
+                        count: 0,
+                        ips: new Set(),
+                        threats: 0,
+                        crawlers: 0
+                    };
+                }
+                locations[key].count++;
+                locations[key].ips.add(entry.ip);
+                if (entry.is_threat === 'true' || entry.is_threat === true) locations[key].threats++;
+                if (entry.is_crawler === 'true' || entry.is_crawler === true) locations[key].crawlers++;
+            }
+        });
+
+        Object.values(locations).forEach(loc => {
+            const color = loc.threats > 0 ? '#ff5555' : '#00d4ff';
+            const marker = L.circleMarker([loc.lat, loc.lng], {
+                radius: Math.min(5 + Math.log(loc.count) * 2, 20),
+                fillColor: color,
+                color: '#fff',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.6
+            }).addTo(map);
+            
+            marker.bindPopup(`
+                <strong>${loc.city || 'Unknown'}, ${loc.country || 'Unknown'}</strong><br>
+                Entries: ${loc.count}<br>
+                Unique IPs: ${loc.ips.size}<br>
+                ${loc.threats > 0 ? `<span style="color: #ff5555">Threats: ${loc.threats}</span><br>` : ''}
+                ${loc.crawlers > 0 ? `Crawlers: ${loc.crawlers}` : ''}
+            `);
+        });
+    }
+
+    // Update table - FIXED with proper security badges
+    function updateTable(data) {
+        const headers = document.getElementById('tableHeaders');
+        const body = document.getElementById('tableBody');
+        
+        if (currentTab === 'visits') {
+            headers.innerHTML = `
+                <th>Timestamp</th>
+                <th>City</th>
+                <th>Region</th>
+                <th>Country</th>
+                <th>Source</th>
+                <th>Referer</th>
+                <th>Language</th>
+                <th>IP</th>
+                <th>User Agent</th>
+                <th>Security</th>
+            `;
+        } else {
+            headers.innerHTML = `
+                <th>Timestamp</th>
+                <th>City</th>
+                <th>Region</th>
+                <th>Country</th>
+                <th>Language</th>
+                <th>IP</th>
+                <th>Security</th>
+                <th>Query</th>
+                <th>Response</th>
+            `;
+        }
+        
+        body.innerHTML = '';
+        
+        const sortedData = [...data].sort((a, b) => 
+            new Date(b.timestamp) - new Date(a.timestamp)
+        );
+        
+        const itemsPerPage = 50;
+        totalPages = Math.ceil(sortedData.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageData = sortedData.slice(startIndex, endIndex);
+        
+        pageData.forEach(entry => {
+            const row = body.insertRow();
+            
+            // FIXED: Create security badges with postal code
+            let securityBadges = '';
+            let hasSecurityIssue = false;
+            
+            if (entry.is_threat === 'true' || entry.is_threat === true) {
+                securityBadges += '<span class="security-badge badge-threat">THREAT</span>';
+                hasSecurityIssue = true;
+            }
+            if (entry.is_tor === 'true' || entry.is_tor === true) {
+                securityBadges += '<span class="security-badge badge-tor">TOR</span>';
+                hasSecurityIssue = true;
+            }
+            if (entry.is_proxy === 'true' || entry.is_proxy === true) {
+                securityBadges += '<span class="security-badge badge-proxy">PROXY</span>';
+                hasSecurityIssue = true;
+            }
+            if (entry.is_crawler === 'true' || entry.is_crawler === true) {
+                securityBadges += '<span class="security-badge badge-crawler">CRAWLER</span>';
+                hasSecurityIssue = true;
+            }
+            
+            if (!hasSecurityIssue) {
+                securityBadges = '<span class="security-badge badge-normal">NORMAL</span>';
+            }
+            
+            // Add postal code if available
+            if (entry.postal_code) {
+                securityBadges += `<br><small>ZIP: ${entry.postal_code}</small>`;
+            }
+            
+            if (currentTab === 'visits') {
+                row.innerHTML = `
+                    <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                    <td>${entry.city || ''}</td>
+                    <td>${entry.region || ''}</td>
+                    <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
+                    <td>${getSourceDisplayName(entry.source)}</td>
+                    <td class="expandable" onclick="toggleExpand(this)">${entry.referer || ''}</td>
+                    <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
+                    <td>${entry.ip || ''}</td>
+                    <td class="expandable" onclick="toggleExpand(this)">${entry.user_agent || ''}</td>
+                    <td>${securityBadges}</td>
+                `;
+            } else {
+                row.innerHTML = `
+                    <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                    <td>${entry.city || ''}</td>
+                    <td>${entry.region || ''}</td>
+                    <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
+                    <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
+                    <td>${entry.ip || ''}</td>
+                    <td>${securityBadges}</td>
+                    <td class="expandable" onclick="toggleExpand(this)">${entry.query || ''}</td>
+                    <td class="expandable" onclick="toggleExpand(this)">${entry.response || ''}</td>
+                `;
+            }
+        });
+    }
+
+    function toggleExpand(cell) {
+        cell.classList.toggle('expanded');
+    }
+
+    function updatePagination() {
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        document.getElementById('prevBtn').disabled = currentPage <= 1;
+        document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+    }
+
+    // Load data
+    async function loadData() {
+        try {
             const sourceFilter = document.getElementById('sourceFilter').value;
-            const ipFilter = document.getElementById('ipFilter').value.toLowerCase();
-            const countryFilter = document.getElementById('countryFilter').value.toLowerCase();
+            const ipFilter = document.getElementById('ipFilter').value;
+            const countryFilter = document.getElementById('countryFilter').value;
+            const refererFilter = document.getElementById('refererFilter').value;
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
 
-            filteredData = allData.filter(entry => {
-                // Source filter
-                if (sourceFilter && entry.source !== sourceFilter) return false;
-                
-                // IP filter
-                if (ipFilter && !entry.ip.toLowerCase().includes(ipFilter)) return false;
-                
-                // Country filter
-                if (countryFilter && !entry.country.toLowerCase().includes(countryFilter)) return false;
-                
-                // Date filters
-                if (dateFrom || dateTo) {
-                    const entryDate = new Date(entry.timestamp);
-                    if (dateFrom && entryDate < new Date(dateFrom)) return false;
-                    if (dateTo) {
-                        const endDate = new Date(dateTo);
-                        endDate.setHours(23, 59, 59, 999);
-                        if (entryDate > endDate) return false;
-                    }
-                }
-                
-                return true;
-            });
-        }
-
-        // Change page
-        function changePage(direction) {
-            const newPage = currentPage + direction;
-            if (newPage >= 1 && newPage <= totalPages) {
-                currentPage = newPage;
-                updateTable(filteredData);
-                updatePagination();
-            }
-        }
-
-        // Update source filter dropdown - FIXED: Shows display names
-        function updateSourceFilter(data) {
-            const sourceFilter = document.getElementById('sourceFilter');
-            const currentValue = sourceFilter.value;
-            
-            // Get unique sources
-            const sources = new Set();
-            data.forEach(entry => {
-                if (entry.source && entry.source.trim() !== '') {
-                    sources.add(entry.source);
-                }
-            });
-            
-            // Sort sources alphabetically by display name
-            const sortedSources = Array.from(sources).sort((a, b) => 
-                getSourceDisplayName(a).toLowerCase().localeCompare(getSourceDisplayName(b).toLowerCase())
-            );
-            
-            // Clear and rebuild dropdown
-            sourceFilter.innerHTML = '<option value="">All Sources</option>';
-            
-            sortedSources.forEach(source => {
-                const option = document.createElement('option');
-                option.value = source;
-                option.textContent = getSourceDisplayName(source); // FIXED: Show display name
-                sourceFilter.appendChild(option);
-            });
-            
-            // Restore previous selection if it still exists
-            if (currentValue && sortedSources.includes(currentValue)) {
-                sourceFilter.value = currentValue;
-            }
-        }
-
-        // Update country filter dropdown - NEW FEATURE
-        function updateCountryFilter(data) {
-            const countryFilter = document.getElementById('countryFilter');
-            const currentValue = countryFilter.value;
-            
-            // Get unique countries
-            const countries = new Set();
-            data.forEach(entry => {
-                if (entry.country && entry.country.trim() !== '' && 
-                    entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
-                    countries.add(entry.country);
-                }
-            });
-            
-            // Sort countries alphabetically
-            const sortedCountries = Array.from(countries).sort((a, b) => 
-                a.toLowerCase().localeCompare(b.toLowerCase())
-            );
-            
-            // Clear and rebuild dropdown
-            countryFilter.innerHTML = '<option value="">All Countries</option>';
-            
-            sortedCountries.forEach(country => {
-                const option = document.createElement('option');
-                option.value = country;
-                option.textContent = country;
-                countryFilter.appendChild(option);
-            });
-            
-            // Restore previous selection if it still exists
-            if (currentValue && sortedCountries.includes(currentValue)) {
-                countryFilter.value = currentValue;
-            }
-        }
-
-        // Update dashboard
-        function updateDashboard(data) {
-            const uniqueIPs = new Set();
-            const countriesSet = new Set();
-            const dailyActivity = new Map();
-            const today = new Date().toDateString();
-            let todayCount = 0;
-            let threatCount = 0;
-            let crawlerCount = 0;
-
-            data.forEach(entry => {
-                uniqueIPs.add(entry.ip);
-                if (entry.country && entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
-                    countriesSet.add(entry.country);
-                }
-                
-                const date = new Date(entry.timestamp).toLocaleDateString();
-                dailyActivity.set(date, (dailyActivity.get(date) || 0) + 1);
-                
-                if (new Date(entry.timestamp).toDateString() === today) {
-                    todayCount++;
-                }
-                
-                if (entry.is_threat === 'true') threatCount++;
-                if (entry.is_crawler === 'true') crawlerCount++;
+            const params = new URLSearchParams({
+                token: authToken,
+                type: currentTab,
+                limit: 100000
             });
 
-            // Update stats
-            document.getElementById('totalEntries').textContent = data.length.toLocaleString();
-            document.getElementById('uniqueIPs').textContent = uniqueIPs.size.toLocaleString();
-            document.getElementById('countries').textContent = countriesSet.size.toLocaleString();
-            document.getElementById('todayCount').textContent = todayCount.toLocaleString();
-            document.getElementById('threats').textContent = threatCount.toLocaleString();
-            document.getElementById('crawlers').textContent = crawlerCount.toLocaleString();
+            if (sourceFilter) params.append('source', sourceFilter);
+            if (ipFilter) params.append('ip', ipFilter);
+            if (countryFilter) params.append('country', countryFilter);
+            if (refererFilter) params.append('referer', refererFilter);
+            if (dateFrom) params.append('start', dateFrom);
+            if (dateTo) params.append('end', dateTo);
 
-            // Update charts
-            updateActivityChart(dailyActivity);
-            updateCountriesChart(data);
-            updateMap(data);
-        }
-
-        // Activity chart
-        function updateActivityChart(dailyActivity) {
-            const ctx = document.getElementById('activityChart').getContext('2d');
+            const response = await fetch(`${API_URL}/monitor/data?${params}`);
+            if (!response.ok) throw new Error('Failed to fetch data');
             
-            if (charts.activity) charts.activity.destroy();
+            const result = await response.json();
+            allData = result.data || [];
             
-            const sortedDates = Array.from(dailyActivity.keys()).sort((a, b) => 
-                new Date(a) - new Date(b)
-            );
-            const labels = sortedDates.slice(-30);
-            const data = labels.map(label => dailyActivity.get(label));
-
-            charts.activity = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Activity',
-                        data,
-                        borderColor: '#00d4ff',
-                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { 
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#8892b0' }
-                        },
-                        x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { 
-                                color: '#8892b0',
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Countries chart
-        function updateCountriesChart(data) {
-            const ctx = document.getElementById('countriesChart').getContext('2d');
-            
-            if (charts.countries) charts.countries.destroy();
-            
-            const countries = {};
-            data.forEach(entry => {
-                if (entry.country && entry.country !== 'Unknown' && entry.country !== 'Error' && entry.country !== 'Local') {
-                    countries[entry.country] = (countries[entry.country] || 0) + 1;
-                }
+            // Load unfiltered data for dropdowns
+            const unfilteredParams = new URLSearchParams({
+                token: authToken,
+                type: currentTab,
+                limit: 100000
             });
             
-            const sorted = Object.entries(countries)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-
-            charts.countries = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: sorted.map(([country]) => country),
-                    datasets: [{
-                        label: 'Entries',
-                        data: sorted.map(([, count]) => count),
-                        backgroundColor: 'rgba(0, 212, 255, 0.8)',
-                        borderColor: 'rgba(0, 212, 255, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { 
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                            ticks: { color: '#8892b0' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#8892b0' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Map
-        function updateMap(data) {
-            if (map) map.remove();
+            const unfilteredResponse = await fetch(`${API_URL}/monitor/data?${unfilteredParams}`);
+            const unfilteredResult = await unfilteredResponse.json();
+            const unfilteredData = unfilteredResult.data || [];
             
-            map = L.map('map', {
-                attributionControl: false,
-                zoomControl: false
-            }).setView([30, 0], 2);
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
-            // Group by location
-            const locations = {};
-            data.forEach(entry => {
-                if (entry.latitude && entry.longitude && 
-                    entry.latitude !== '0' && entry.longitude !== '0') {
-                    const key = `${entry.latitude},${entry.longitude}`;
-                    if (!locations[key]) {
-                        locations[key] = {
-                            lat: parseFloat(entry.latitude),
-                            lng: parseFloat(entry.longitude),
-                            city: entry.city,
-                            country: entry.country,
-                            count: 0,
-                            ips: new Set(),
-                            threats: 0,
-                            crawlers: 0
-                        };
-                    }
-                    locations[key].count++;
-                    locations[key].ips.add(entry.ip);
-                    if (entry.is_threat === 'true') locations[key].threats++;
-                    if (entry.is_crawler === 'true') locations[key].crawlers++;
-                }
-            });
-
-            // Add markers
-            Object.values(locations).forEach(loc => {
-                const color = loc.threats > 0 ? '#ff5555' : '#00d4ff';
-                const marker = L.circleMarker([loc.lat, loc.lng], {
-                    radius: Math.min(5 + Math.log(loc.count) * 2, 20),
-                    fillColor: color,
-                    color: '#fff',
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.6
-                }).addTo(map);
-                
-                marker.bindPopup(`
-                    <strong>${loc.city || 'Unknown'}, ${loc.country || 'Unknown'}</strong><br>
-                    Entries: ${loc.count}<br>
-                    Unique IPs: ${loc.ips.size}<br>
-                    ${loc.threats > 0 ? `<span style="color: #ff5555">Threats: ${loc.threats}</span><br>` : ''}
-                    ${loc.crawlers > 0 ? `Crawlers: ${loc.crawlers}` : ''}
-                `);
-            });
-        }
-
-        // Update table - FIXED: New header order + display names for sources
-        function updateTable(data) {
-            const headers = document.getElementById('tableHeaders');
-            const body = document.getElementById('tableBody');
-            
-            // FIXED: New header order as requested
             if (currentTab === 'visits') {
-                headers.innerHTML = `
-                    <th>Timestamp</th>
-                    <th>City</th>
-                    <th>Region</th>
-                    <th>Country</th>
-                    <th>Source</th>
-                    <th>Referer</th>
-                    <th>Language</th>
-                    <th>ISP</th>
-                    <th>IP</th>
-                    <th>User Agent</th>
-                    <th>Security</th>
-                `;
-            } else {
-                headers.innerHTML = `
-                    <th>Timestamp</th>
-                    <th>City</th>
-                    <th>Region</th>
-                    <th>Country</th>
-                    <th>Language</th>
-                    <th>ISP</th>
-                    <th>IP</th>
-                    <th>Security</th>
-                    <th>Query</th>
-                    <th>Response</th>
-                `;
+                updateSourceFilter(unfilteredData);
+                updateRefererFilter(unfilteredData);
             }
+            updateCountryFilter(unfilteredData);
             
-            // Clear table
-            body.innerHTML = '';
+            filteredData = allData;
             
-            // Sort by timestamp descending (newest first)
-            const sortedData = [...data].sort((a, b) => 
-                new Date(b.timestamp) - new Date(a.timestamp)
-            );
+            updateDashboard(filteredData);
+            updateTable(filteredData);
+            updatePagination();
+        } catch (error) {
+            console.error('Error loading data:', error);
+            allData = [];
+            filteredData = [];
+            updateDashboard([]);
+            updateTable([]);
+            updatePagination();
+        }
+    }
+
+    // File management functions
+    async function loadFiles() {
+        try {
+            const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
+            if (!response.ok) throw new Error('Failed to fetch files');
             
-            // Calculate pagination
-            const itemsPerPage = 50;
-            totalPages = Math.ceil(sortedData.length / itemsPerPage);
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const pageData = sortedData.slice(startIndex, endIndex);
+            const files = await response.json();
+            const tbody = document.getElementById('filesTableBody');
+            tbody.innerHTML = '';
             
-            // Populate table with current page data
-            pageData.forEach(entry => {
-                const row = body.insertRow();
+            files.forEach(file => {
+                const row = tbody.insertRow();
+                const sizeKB = (file.size / 1024).toFixed(2);
+                const modified = new Date(file.modified).toLocaleString();
                 
-                // Create security badges
-                let securityBadges = '';
-                let hasSecurityIssue = false;
-                
-                if (entry.is_threat === 'true') {
-                    securityBadges += '<span class="security-badge badge-threat">THREAT</span>';
-                    hasSecurityIssue = true;
-                }
-                if (entry.is_tor === 'true') {
-                    securityBadges += '<span class="security-badge badge-tor">TOR</span>';
-                    hasSecurityIssue = true;
-                }
-                if (entry.is_proxy === 'true') {
-                    securityBadges += '<span class="security-badge badge-proxy">PROXY</span>';
-                    hasSecurityIssue = true;
-                }
-                if (entry.is_crawler === 'true') {
-                    securityBadges += '<span class="security-badge badge-crawler">CRAWLER</span>';
-                    hasSecurityIssue = true;
-                }
-                
-                if (!hasSecurityIssue) {
-                    securityBadges = '<span class="security-badge badge-normal">NORMAL</span>';
-                }
-                
-                // FIXED: New column order + display name for source
-                if (currentTab === 'visits') {
-                    row.innerHTML = `
-                        <td>${new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>${entry.city || ''} ${entry.postal_code || ''}</td>
-                        <td>${entry.region || ''}</td>
-                        <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
-                        <td>${getSourceDisplayName(entry.source)}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.referer || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
-                        <td>${entry.ip || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.user_agent || ''}</td>
-                        <td>${securityBadges}</td>
-                    `;
-                } else {
-                    row.innerHTML = `
-                        <td>${new Date(entry.timestamp).toLocaleString()}</td>
-                        <td>${entry.city || ''}</td>
-                        <td>${entry.region || ''}</td>
-                        <td>${entry.country || ''} ${entry.country_code ? `(${entry.country_code})` : ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.language || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.isp || ''}</td>
-                        <td>${entry.ip || ''}</td>
-                        <td>${securityBadges}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.query || ''}</td>
-                        <td class="expandable" onclick="toggleExpand(this)">${entry.response || ''}</td>
-                    `;
-                }
+                row.innerHTML = `
+                    <td>${file.name}</td>
+                    <td>${sizeKB} KB</td>
+                    <td>${modified}</td>
+                    <td>
+                        <button class="btn btn-small" onclick="downloadFile('${file.name}')">Download</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>
+                    </td>
+                `;
             });
+        } catch (error) {
+            console.error('Error loading files:', error);
+            document.getElementById('filesTableBody').innerHTML = 
+                '<tr><td colspan="4">Error loading files</td></tr>';
         }
+    }
 
-        // Toggle expand cell
-        function toggleExpand(cell) {
-            cell.classList.toggle('expanded');
+    async function uploadFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Please select a file');
+            return;
         }
-
-        // Update pagination
-        function updatePagination() {
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
-            document.getElementById('prevBtn').disabled = currentPage <= 1;
-            document.getElementById('nextBtn').disabled = currentPage >= totalPages;
-        }
-
-        // Load data - FIXED: Now properly handles filtering
-        async function loadData() {
+        
+        const reader = new FileReader();
+        reader.onload = async (e) => {
             try {
-                // Get filter values
-                const sourceFilter = document.getElementById('sourceFilter').value;
-                const ipFilter = document.getElementById('ipFilter').value;
-                const countryFilter = document.getElementById('countryFilter').value;
-                const dateFrom = document.getElementById('dateFrom').value;
-                const dateTo = document.getElementById('dateTo').value;
-
-                // Build query parameters
-                const params = new URLSearchParams({
-                    token: authToken,
-                    type: currentTab,
-                    limit: 100000 // Get all data for proper filtering
+                const response = await fetch(`${API_URL}/monitor/upload`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: authToken,
+                        filename: file.name,
+                        content: e.target.result
+                    })
                 });
-
-                // Add filters to API call
-                if (sourceFilter) params.append('source', sourceFilter);
-                if (ipFilter) params.append('ip', ipFilter);
-                if (countryFilter) params.append('country', countryFilter);
-                if (dateFrom) params.append('start', dateFrom);
-                if (dateTo) params.append('end', dateTo);
-
-                const response = await fetch(`${API_URL}/monitor/data?${params}`);
-                if (!response.ok) throw new Error('Failed to fetch data');
                 
                 const result = await response.json();
-                allData = result.data || [];
-                
-                // Always load unfiltered data for dropdowns
-                const unfilteredParams = new URLSearchParams({
-                    token: authToken,
-                    type: currentTab,
-                    limit: 100000
-                });
-                
-                const unfilteredResponse = await fetch(`${API_URL}/monitor/data?${unfilteredParams}`);
-                const unfilteredResult = await unfilteredResponse.json();
-                const unfilteredData = unfilteredResult.data || [];
-                
-                // Update filter dropdowns with all available data
-                if (currentTab === 'visits') {
-                    updateSourceFilter(unfilteredData);
-                }
-                updateCountryFilter(unfilteredData);
-                
-                // Set filtered data to current results
-                filteredData = allData;
-                
-                // Update everything with filtered data
-                updateDashboard(filteredData);
-                updateTable(filteredData);
-                updatePagination();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                allData = [];
-                filteredData = [];
-                updateDashboard([]);
-                updateTable([]);
-                updatePagination();
-            }
-        }
-
-        // Load files - FIXED
-        async function loadFiles() {
-            try {
-                const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
-                if (!response.ok) throw new Error('Failed to fetch files');
-                
-                const files = await response.json();
-                const tbody = document.getElementById('filesTableBody');
-                tbody.innerHTML = '';
-                
-                files.forEach(file => {
-                    const row = tbody.insertRow();
-                    const sizeKB = (file.size / 1024).toFixed(2);
-                    const modified = new Date(file.modified).toLocaleString();
-                    
-                    row.innerHTML = `
-                        <td>${file.name}</td>
-                        <td>${sizeKB} KB</td>
-                        <td>${modified}</td>
-                        <td>
-                            <button class="btn btn-small" onclick="downloadFile('${file.name}')">Download</button>
-                            <button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>
-                        </td>
-                    `;
-                });
-            } catch (error) {
-                console.error('Error loading files:', error);
-                document.getElementById('filesTableBody').innerHTML = 
-                    '<tr><td colspan="4">Error loading files</td></tr>';
-            }
-        }
-
-        // Upload file
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('Please select a file');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const response = await fetch(`${API_URL}/monitor/upload`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            token: authToken,
-                            filename: file.name,
-                            content: e.target.result
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    if (response.ok) {
-                        alert(`File ${file.name} uploaded successfully`);
-                        loadFiles();
-                        fileInput.value = '';
-                        document.getElementById('fileUploadText').textContent = 'Or drag and drop a file here';
-                        document.getElementById('uploadBtn').style.display = 'none';
-                    } else {
-                        alert('Upload failed: ' + (result.error || 'Unknown error'));
-                    }
-                } catch (error) {
-                    alert('Upload error: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Delete file
-        async function deleteFile(filename) {
-            const isEssential = ['visits.csv', 'queries-reisig.csv', 'ip-cache.csv'].includes(filename);
-            const message = isEssential 
-                ? `Delete ${filename}? This will clear all data and the file will be recreated empty.`
-                : `Delete ${filename}?`;
-                
-            if (!confirm(message)) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/monitor/file/${filename}?token=${authToken}`, {
-                    method: 'DELETE'
-                });
-                
                 if (response.ok) {
-                    alert('File deleted successfully');
+                    alert(`File ${file.name} uploaded successfully`);
                     loadFiles();
+                    fileInput.value = '';
+                    document.getElementById('fileUploadText').textContent = 'Or drag and drop a file here';
+                    document.getElementById('uploadBtn').style.display = 'none';
                 } else {
-                    const error = await response.json();
-                    alert('Delete failed: ' + (error.error || 'Unknown error'));
+                    alert('Upload failed: ' + (result.error || 'Unknown error'));
                 }
             } catch (error) {
-                alert('Delete error: ' + error.message);
+                alert('Upload error: ' + error.message);
             }
-        }
+        };
+        reader.readAsText(file);
+    }
 
-        // Download file
-        function downloadFile(filename) {
-            window.open(`${API_URL}/monitor/download/${filename}?token=${authToken}`, '_blank');
+    async function deleteFile(filename) {
+        const isEssential = ['visits.csv', 'queries-reisig.csv', 'ip-cache.csv'].includes(filename);
+        const message = isEssential 
+            ? `Delete ${filename}? This will clear all data and the file will be recreated empty.`
+            : `Delete ${filename}?`;
+            
+        if (!confirm(message)) return;
+        
+        try {
+            const response = await fetch(`${API_URL}/monitor/file/${filename}?token=${authToken}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                alert('File deleted successfully');
+                loadFiles();
+            } else {
+                const error = await response.json();
+                alert('Delete failed: ' + (error.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Delete error: ' + error.message);
         }
+    }
 
-        // Initialize on page load
-        window.addEventListener('load', () => {
-            filteredData = allData;
-        });
-    </script>
+    function downloadFile(filename) {
+        window.open(`${API_URL}/monitor/download/${filename}?token=${authToken}`, '_blank');
+    }
+
+    window.addEventListener('load', () => {
+        filteredData = allData;
+    });
+</script>
+
 </body>
 </html>
