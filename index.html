@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0e1a'/><path d='M25 60 L50 30 L75 50 L75 40 L50 20 L25 50 L25 70 L75 70 L75 60' fill='%2300d4ff' stroke='%2300d4ff' stroke-width='2' stroke-linejoin='round'/></svg>">
     
     <style>
@@ -59,45 +59,45 @@
             background: var(--accent-hover);
         }
 
-        /* Login */
+        /* Login - Mobile First */
         .login-container {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            padding: 1rem;
         }
 
         .login-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 3rem;
+            padding: 2rem 1.5rem;
             border-radius: 20px;
-            width: 90%;
+            width: 100%;
             max-width: 400px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
         }
 
         .login-box h1 {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             font-weight: 600;
             text-align: center;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2rem;
+            font-size: 1.75rem;
         }
 
         .login-input {
             width: 100%;
-            padding: 1rem;
+            padding: 0.875rem;
             background: var(--bg-secondary);
             border: 2px solid transparent;
             border-radius: 10px;
             color: var(--text-primary);
             font-size: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             transition: all 0.3s;
         }
 
@@ -109,7 +109,7 @@
 
         .login-button {
             width: 100%;
-            padding: 1rem;
+            padding: 0.875rem;
             background: var(--accent-gradient);
             border: none;
             border-radius: 10px;
@@ -132,7 +132,7 @@
             font-size: 0.9rem;
         }
 
-        /* Dashboard */
+        /* Dashboard - Mobile First */
         .dashboard {
             display: none;
             min-height: 100vh;
@@ -142,7 +142,7 @@
         .header {
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border);
-            padding: 1.5rem 2rem;
+            padding: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -151,7 +151,7 @@
 
         .header h1 {
             font-weight: 600;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -161,10 +161,11 @@
             background: var(--danger);
             border: none;
             color: white;
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1rem;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
+            font-size: 0.875rem;
             transition: all 0.3s;
         }
 
@@ -174,31 +175,34 @@
         }
 
         .container {
-            padding: 2rem;
+            padding: 1rem;
             max-width: 1800px;
             margin: 0 auto;
         }
 
-        /* Tabs */
+        /* Tabs - Mobile First */
         .tabs {
             display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
             background: var(--bg-card);
-            padding: 0.5rem;
+            padding: 0.375rem;
             border-radius: 12px;
-            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .tab {
-            padding: 0.8rem 1.5rem;
+            padding: 0.625rem 1rem;
             background: transparent;
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
             border-radius: 8px;
             font-weight: 500;
+            font-size: 0.875rem;
             transition: all 0.3s;
+            white-space: nowrap;
         }
 
         .tab:hover {
@@ -210,29 +214,29 @@
             color: white;
         }
 
-        /* Stats Cards */
+        /* Stats Cards - Mobile First */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
 
         .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 1rem;
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
@@ -241,20 +245,20 @@
 
         .stat-label {
             color: var(--text-secondary);
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
-        /* Security Indicators */
+        /* Security Badges */
         .security-badge {
             display: inline-block;
-            padding: 0.2rem 0.6rem;
+            padding: 0.125rem 0.375rem;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.625rem;
             font-weight: 600;
-            margin: 0 0.2rem;
+            margin: 0.125rem;
         }
 
         .badge-threat { background: var(--danger); color: white; }
@@ -263,55 +267,55 @@
         .badge-crawler { background: #3b82f6; color: white; }
         .badge-normal { background: var(--text-secondary); color: white; }
 
-        /* Charts */
+        /* Charts - Mobile First */
         .chart-container {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .chart-title {
             font-weight: 600;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
             color: var(--text-primary);
         }
 
         #map {
-            height: 400px;
+            height: 300px;
             border-radius: 8px;
-            margin-top: 1rem;
+            margin-top: 0.75rem;
         }
 
-        /* Remove Leaflet controls */
         .leaflet-control-attribution,
         .leaflet-control-zoom {
             display: none !important;
         }
 
-        /* Table */
+        /* Table - Mobile First */
         .table-container {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .table-wrapper {
             overflow-x: auto;
-            margin-top: 1rem;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 0.75rem;
             border-radius: 8px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1400px;
+            min-width: 800px;
         }
 
         th {
@@ -319,19 +323,19 @@
             color: var(--accent);
             font-weight: 600;
             text-align: left;
-            padding: 1rem;
-            font-size: 0.85rem;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         td {
-            padding: 0.75rem 1rem;
+            padding: 0.625rem 0.5rem;
             border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
+            font-size: 0.8125rem;
             color: var(--text-primary);
         }
 
@@ -339,9 +343,8 @@
             background: rgba(0, 212, 255, 0.05);
         }
 
-        /* Expandable cells */
         .expandable {
-            max-width: 300px;
+            max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -358,27 +361,29 @@
             word-break: break-word;
             max-width: none;
             background: var(--bg-secondary);
-            padding: 0.5rem;
+            padding: 0.375rem;
             border-radius: 4px;
         }
 
-        /* Pagination */
+        /* Pagination - Mobile First */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
-            margin: 2rem 0;
+            gap: 0.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
         }
 
         .page-btn {
             background: var(--bg-card);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            padding: 0.6rem 1.2rem;
+            padding: 0.5rem 0.875rem;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
+            font-size: 0.875rem;
             transition: all 0.3s;
         }
 
@@ -396,16 +401,17 @@
         .page-info {
             color: var(--text-secondary);
             font-weight: 500;
+            font-size: 0.875rem;
         }
 
-        /* Filters */
+        /* Filters - Mobile First */
         .filters {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
             background: var(--bg-card);
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 12px;
             border: 1px solid var(--border);
         }
@@ -413,23 +419,24 @@
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.375rem;
         }
 
         .filter-label {
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .filter-input {
-            padding: 0.6rem;
+            padding: 0.5rem;
             background: var(--bg-secondary);
             border: 2px solid transparent;
             border-radius: 8px;
             color: var(--text-primary);
+            font-size: 0.875rem;
             transition: all 0.3s;
         }
 
@@ -438,13 +445,13 @@
             border-color: var(--accent);
         }
 
-        /* File Manager */
+        /* File Manager - Mobile First */
         .file-manager {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
             display: none;
         }
 
@@ -452,9 +459,9 @@
             background: var(--bg-secondary);
             border: 2px dashed var(--accent);
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem 1rem;
             text-align: center;
-            margin: 1.5rem 0;
+            margin: 1rem 0;
             transition: all 0.3s;
         }
 
@@ -469,12 +476,13 @@
 
         .file-upload-label {
             display: inline-block;
-            padding: 0.8rem 2rem;
+            padding: 0.625rem 1.25rem;
             background: var(--accent-gradient);
             color: white;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
+            font-size: 0.875rem;
             transition: all 0.3s;
         }
 
@@ -484,19 +492,21 @@
         }
 
         .file-upload-text {
-            margin-top: 1rem;
+            margin-top: 0.75rem;
             color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
-        /* Buttons */
+        /* Buttons - Mobile First */
         .btn {
             background: var(--accent-gradient);
             border: none;
             color: white;
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1rem;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
+            font-size: 0.875rem;
             transition: all 0.3s;
         }
 
@@ -510,21 +520,255 @@
         }
 
         .btn-small {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
+            padding: 0.375rem 0.625rem;
+            font-size: 0.75rem;
         }
 
-        @media (max-width: 768px) {
-            .filters {
-                grid-template-columns: 1fr;
+        /* Tablet and up */
+        @media (min-width: 768px) {
+            .login-box {
+                padding: 3rem;
             }
-            
+
+            .login-box h1 {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+
+            .login-input {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .login-button {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1.5rem 2rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .logout-btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+                padding: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .tab {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+                margin-bottom: 1.5rem;
             }
-            
+
+            .stat-card {
+                padding: 1.25rem;
+            }
+
+            .stat-value {
+                font-size: 2.25rem;
+            }
+
+            .stat-label {
+                font-size: 0.85rem;
+                margin-top: 0.375rem;
+            }
+
+            .filters {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .filter-group {
+                gap: 0.5rem;
+            }
+
+            .filter-label {
+                font-size: 0.85rem;
+            }
+
+            .filter-input {
+                padding: 0.6rem;
+                font-size: 1rem;
+            }
+
+            .chart-container {
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .chart-title {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+
+            #map {
+                height: 350px;
+                margin-top: 1rem;
+            }
+
+            .table-container {
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .table-wrapper {
+                margin-top: 1rem;
+            }
+
+            th {
+                padding: 0.875rem;
+                font-size: 0.85rem;
+            }
+
+            td {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .expandable {
+                max-width: 250px;
+            }
+
+            .pagination {
+                gap: 0.75rem;
+                margin: 1.5rem 0;
+            }
+
+            .page-btn {
+                padding: 0.6rem 1.2rem;
+                font-size: 1rem;
+            }
+
+            .page-info {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .btn-small {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Desktop */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.9rem;
+                margin-top: 0.5rem;
+                letter-spacing: 1px;
+            }
+
+            .filters {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .chart-container {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            #map {
+                height: 400px;
+            }
+
+            .table-container {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
             table {
-                min-width: 800px;
+                min-width: 1400px;
+            }
+
+            th {
+                padding: 1rem;
+            }
+
+            td {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .expandable {
+                max-width: 300px;
+            }
+
+            .pagination {
+                gap: 1rem;
+                margin: 2rem 0;
+            }
+
+            .file-manager {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .file-upload {
+                padding: 2rem;
+                margin: 1.5rem 0;
+            }
+
+            .file-upload-label {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+
+            .file-upload-text {
+                margin-top: 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Security badge adjustments for mobile */
+        @media (max-width: 767px) {
+            .security-badge {
+                font-size: 0.5rem;
+                padding: 0.1rem 0.25rem;
+                margin: 0.05rem;
             }
         }
     </style>
@@ -560,8 +804,8 @@
                 <div class="filter-group" id="sourceFilterGroup">
                     <label class="filter-label">Source</label>
                     <select class="filter-input" id="sourceFilter">
-    <option value="">All Sources</option>
-</select>
+                        <option value="">All Sources</option>
+                    </select>
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">IP Address</label>
@@ -613,7 +857,27 @@
                 </div>
             </div>
 
-            <!-- Charts -->
+            <!-- Data Table (NOW AT TOP) -->
+            <div class="table-container" id="dataTableContainer">
+                <h3 class="chart-title">Detailed Data</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr id="tableHeaders"></tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Previous</button>
+                    <span class="page-info" id="pageInfo">Page 1 of 1</span>
+                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+                </div>
+            </div>
+
+            <!-- Charts (NOW BELOW TABLE) -->
             <div id="chartsSection">
                 <div class="chart-container">
                     <h3 class="chart-title">Activity Over Time</h3>
@@ -635,7 +899,7 @@
             <div class="file-manager" id="fileManager">
                 <h3 class="chart-title">Storage Files</h3>
                 <div class="file-upload">
-                    <input type="file" id="fileInput" class="file-upload-input">
+                    <input type="file" id="fileInput" class="file-upload-input" accept=".csv,.json,.txt">
                     <label for="fileInput" class="file-upload-label">Choose File</label>
                     <div class="file-upload-text" id="fileUploadText">Or drag and drop a file here</div>
                     <button class="btn" onclick="uploadFile()" style="margin-top: 1rem; display: none;" id="uploadBtn">Upload File</button>
@@ -654,26 +918,6 @@
                     </table>
                 </div>
             </div>
-
-            <!-- Data Table -->
-            <div class="table-container" id="dataTableContainer">
-                <h3 class="chart-title">Detailed Data</h3>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr id="tableHeaders"></tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-                
-                <!-- Pagination -->
-                <div class="pagination">
-                    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Previous</button>
-                    <span class="page-info" id="pageInfo">Page 1 of 1</span>
-                    <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -685,6 +929,7 @@
         let currentPage = 1;
         let totalPages = 1;
         let allData = [];
+        let filteredData = [];
         let charts = {};
         let map = null;
 
@@ -770,7 +1015,43 @@
         // Apply filters
         function applyFilters() {
             currentPage = 1;
-            loadData();
+            filterCurrentData();
+            updateDashboard(filteredData);
+            updateTable(filteredData);
+            updatePagination();
+        }
+
+        // Filter data
+        function filterCurrentData() {
+            const sourceFilter = document.getElementById('sourceFilter').value;
+            const ipFilter = document.getElementById('ipFilter').value.toLowerCase();
+            const countryFilter = document.getElementById('countryFilter').value.toLowerCase();
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            filteredData = allData.filter(entry => {
+                // Source filter
+                if (sourceFilter && entry.source !== sourceFilter) return false;
+                
+                // IP filter
+                if (ipFilter && !entry.ip.toLowerCase().includes(ipFilter)) return false;
+                
+                // Country filter
+                if (countryFilter && !entry.country.toLowerCase().includes(countryFilter)) return false;
+                
+                // Date filters
+                if (dateFrom || dateTo) {
+                    const entryDate = new Date(entry.timestamp);
+                    if (dateFrom && entryDate < new Date(dateFrom)) return false;
+                    if (dateTo) {
+                        const endDate = new Date(dateTo);
+                        endDate.setHours(23, 59, 59, 999);
+                        if (entryDate > endDate) return false;
+                    }
+                }
+                
+                return true;
+            });
         }
 
         // Change page
@@ -778,44 +1059,44 @@
             const newPage = currentPage + direction;
             if (newPage >= 1 && newPage <= totalPages) {
                 currentPage = newPage;
-                loadData();
+                updateTable(filteredData);
+                updatePagination();
             }
         }
 
         // Update source filter dropdown
-function updateSourceFilter(data) {
-    const sourceFilter = document.getElementById('sourceFilter');
-    const currentValue = sourceFilter.value;
-    
-    // Get unique sources (using entry.source, as per data structure)
-    const sources = new Set();
-    data.forEach(entry => {
-        if (entry.source && entry.source.trim() !== '') {
-            sources.add(entry.source);
+        function updateSourceFilter(data) {
+            const sourceFilter = document.getElementById('sourceFilter');
+            const currentValue = sourceFilter.value;
+            
+            // Get unique sources
+            const sources = new Set();
+            data.forEach(entry => {
+                if (entry.source && entry.source.trim() !== '') {
+                    sources.add(entry.source);
+                }
+            });
+            
+            // Sort sources alphabetically
+            const sortedSources = Array.from(sources).sort((a, b) => 
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+            
+            // Clear and rebuild dropdown
+            sourceFilter.innerHTML = '<option value="">All Sources</option>';
+            
+            sortedSources.forEach(source => {
+                const option = document.createElement('option');
+                option.value = source;
+                option.textContent = source;
+                sourceFilter.appendChild(option);
+            });
+            
+            // Restore previous selection if it still exists
+            if (currentValue && sortedSources.includes(currentValue)) {
+                sourceFilter.value = currentValue;
+            }
         }
-    });
-    
-    // Sort sources alphabetically
-    const sortedSources = Array.from(sources).sort((a, b) => 
-        a.toLowerCase().localeCompare(b.toLowerCase())
-    );
-    
-    // Clear and rebuild dropdown
-    sourceFilter.innerHTML = '<option value="">All Sources</option>';
-    
-    sortedSources.forEach(source => {
-        const option = document.createElement('option');
-        option.value = source;
-        option.textContent = source;
-        sourceFilter.appendChild(option);
-    });
-    
-    // Restore previous selection if it still exists
-    if (currentValue && sortedSources.includes(currentValue)) {
-        sourceFilter.value = currentValue;
-    }
-}
-        
 
         // Update dashboard
         function updateDashboard(data) {
@@ -885,6 +1166,7 @@ function updateSourceFilter(data) {
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
                     plugins: { 
                         legend: { display: false }
                     },
@@ -938,6 +1220,7 @@ function updateSourceFilter(data) {
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
                     plugins: { 
                         legend: { display: false }
                     },
@@ -1014,12 +1297,12 @@ function updateSourceFilter(data) {
             });
         }
 
-        // Update table
+        // Update table with proper pagination
         function updateTable(data) {
             const headers = document.getElementById('tableHeaders');
             const body = document.getElementById('tableBody');
             
-            // Set headers based on tab with ALL fields
+            // Set headers based on tab
             if (currentTab === 'visits') {
                 headers.innerHTML = `
                     <th>Timestamp</th>
@@ -1047,18 +1330,26 @@ function updateSourceFilter(data) {
                 `;
             }
             
-            // Clear and populate table
+            // Clear table
             body.innerHTML = '';
             
-            // Sort by timestamp descending
+            // Sort by timestamp descending (newest first)
             const sortedData = [...data].sort((a, b) => 
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
             
-            sortedData.forEach(entry => {
+            // Calculate pagination
+            const itemsPerPage = 50;
+            totalPages = Math.ceil(sortedData.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = sortedData.slice(startIndex, endIndex);
+            
+            // Populate table with current page data
+            pageData.forEach(entry => {
                 const row = body.insertRow();
                 
-                // Create security badges - "NORMAL" means no security issues detected
+                // Create security badges
                 let securityBadges = '';
                 let hasSecurityIssue = false;
                 
@@ -1079,7 +1370,6 @@ function updateSourceFilter(data) {
                     hasSecurityIssue = true;
                 }
                 
-                // Show "NORMAL" only if no security issues
                 if (!hasSecurityIssue) {
                     securityBadges = '<span class="security-badge badge-normal">NORMAL</span>';
                 }
@@ -1120,69 +1410,82 @@ function updateSourceFilter(data) {
 
         // Update pagination
         function updatePagination() {
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
             document.getElementById('prevBtn').disabled = currentPage <= 1;
             document.getElementById('nextBtn').disabled = currentPage >= totalPages;
         }
 
-        // Load data - CORRECTED VERSION (replace both existing loadData functions with this one)
-async function loadData() {
-    const params = new URLSearchParams({
-        token: authToken,
-        type: currentTab,
-        page: currentPage,
-        limit: 50,
-        ip: document.getElementById('ipFilter').value,
-        country: document.getElementById('countryFilter').value,
-        start: document.getElementById('dateFrom').value,
-        end: document.getElementById('dateTo').value
-    });
-    
-    // Only add source filter if not on queries tab - USING CORRECT PARAMETER NAME
-    if (currentTab !== 'queries') {
-        const sourceValue = document.getElementById('sourceFilter').value;
-        if (sourceValue) {
-            params.append('source', sourceValue); // CORRECT: using 'source', not 'referer'
+        // Load data - FIXED VERSION
+        async function loadData() {
+            try {
+                // Load ALL data without pagination for complete filtering
+                const params = new URLSearchParams({
+                    token: authToken,
+                    type: currentTab,
+                    limit: 100000 // Get all data
+                });
+
+                const response = await fetch(`${API_URL}/monitor/data?${params}`);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                const result = await response.json();
+                allData = result.data || [];
+                
+                // Update source filter dropdown
+                if (currentTab === 'visits') {
+                    updateSourceFilter(allData);
+                }
+                
+                // Apply filters
+                filterCurrentData();
+                
+                // Update everything with filtered data
+                updateDashboard(filteredData);
+                updateTable(filteredData);
+                updatePagination();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                allData = [];
+                filteredData = [];
+                updateDashboard([]);
+                updateTable([]);
+                updatePagination();
+            }
         }
-    }
 
-    // Remove empty params
-    Array.from(params.keys()).forEach(key => {
-        if (!params.get(key)) params.delete(key);
-    });
-
-    try {
-        const response = await fetch(`${API_URL}/monitor/data?${params}`);
-        if (!response.ok) throw new Error('Failed to fetch data');
-        
-        const result = await response.json();
-        allData = result.data || [];
-        totalPages = result.pages || 1;
-        currentPage = result.page || 1;
-        
-        // Load all data for charts and source filter
-        const allParams = new URLSearchParams(params);
-        allParams.set('limit', '10000');
-        allParams.delete('page');
-        allParams.delete('source'); // Remove source filter to get all sources for dropdown
-        
-        const allResponse = await fetch(`${API_URL}/monitor/data?${allParams}`);
-        const allResult = await allResponse.json();
-        
-        // Update source filter dropdown with actual sources
-        if (currentTab === 'visits') {
-            updateSourceFilter(allResult.data || []);
+        // Load files - FIXED VERSION
+        async function loadFiles() {
+            try {
+                const response = await fetch(`${API_URL}/monitor/files?token=${authToken}`);
+                if (!response.ok) throw new Error('Failed to fetch files');
+                
+                const files = await response.json();
+                const tbody = document.getElementById('filesTableBody');
+                tbody.innerHTML = '';
+                
+                files.forEach(file => {
+                    const row = tbody.insertRow();
+                    const sizeKB = (file.size / 1024).toFixed(2);
+                    const modified = new Date(file.modified).toLocaleString();
+                    
+                    row.innerHTML = `
+                        <td>${file.name}</td>
+                        <td>${sizeKB} KB</td>
+                        <td>${modified}</td>
+                        <td>
+                            <button class="btn btn-small" onclick="downloadFile('${file.name}')">Download</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteFile('${file.name}')">Delete</button>
+                        </td>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading files:', error);
+                document.getElementById('filesTableBody').innerHTML = 
+                    '<tr><td colspan="4">Error loading files</td></tr>';
+            }
         }
-        
-        updateDashboard(allResult.data || []);
-        updateTable(allData);
-        updatePagination();
-    } catch (error) {
-        console.error('Error loading data:', error);
-    }
-}
 
-
+        // Upload file - FIXED VERSION
         async function uploadFile() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
@@ -1207,17 +1510,13 @@ async function loadData() {
                     
                     const result = await response.json();
                     if (response.ok) {
-                        if (result.overwritten) {
-                            alert(`File ${file.name} uploaded successfully (overwrote existing file)`);
-                        } else {
-                            alert('File uploaded successfully');
-                        }
+                        alert(`File ${file.name} uploaded successfully`);
                         loadFiles();
                         fileInput.value = '';
                         document.getElementById('fileUploadText').textContent = 'Or drag and drop a file here';
                         document.getElementById('uploadBtn').style.display = 'none';
                     } else {
-                        alert('Upload failed: ' + result.error);
+                        alert('Upload failed: ' + (result.error || 'Unknown error'));
                     }
                 } catch (error) {
                     alert('Upload error: ' + error.message);
@@ -1226,6 +1525,7 @@ async function loadData() {
             reader.readAsText(file);
         }
 
+        // Delete file - FIXED VERSION
         async function deleteFile(filename) {
             const isEssential = ['visits.csv', 'queries-reisig.csv', 'ip-cache.csv'].includes(filename);
             const message = isEssential 
@@ -1244,16 +1544,23 @@ async function loadData() {
                     loadFiles();
                 } else {
                     const error = await response.json();
-                    alert('Delete failed: ' + error.error);
+                    alert('Delete failed: ' + (error.error || 'Unknown error'));
                 }
             } catch (error) {
                 alert('Delete error: ' + error.message);
             }
         }
 
+        // Download file
         function downloadFile(filename) {
             window.open(`${API_URL}/monitor/download/${filename}?token=${authToken}`, '_blank');
         }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            // Set initial filter state
+            filteredData = allData;
+        });
     </script>
 </body>
 </html>
